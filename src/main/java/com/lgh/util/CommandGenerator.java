@@ -1,7 +1,7 @@
 package com.lgh.util;
 
 
-import com.lgh.dto.PingCommand;
+import com.lgh.model.PingCommand;
 
 public class CommandGenerator {
 	public PingCommand createPingCommand(){

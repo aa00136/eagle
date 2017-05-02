@@ -9,8 +9,8 @@ import com.google.gson.JsonObject;
 
 import com.lgh.constant.ClientConfig;
 import com.lgh.constant.CommandCode;
-import com.lgh.dto.Command;
-import com.lgh.dto.CommandResponse;
+import com.lgh.model.Command;
+import com.lgh.model.CommandResponse;
 import com.lgh.handler.comman.ClientCommandHandler;
 import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;

@@ -1,8 +1,8 @@
 package com.lgh.handler.heartbeat;
 
 import com.lgh.constant.CommandCode;
-import com.lgh.dto.Command;
-import com.lgh.dto.PingCommandResponse;
+import com.lgh.model.Command;
+import com.lgh.model.PingCommandResponse;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelHandler.Sharable;

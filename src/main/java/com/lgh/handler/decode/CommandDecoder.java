@@ -4,9 +4,9 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import com.lgh.constant.CommandCode;
-import com.lgh.dto.Command;
-import com.lgh.dto.PingAckCommand;
-import com.lgh.dto.PingCommand;
+import com.lgh.model.Command;
+import com.lgh.model.PingAckCommand;
+import com.lgh.model.PingCommand;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;

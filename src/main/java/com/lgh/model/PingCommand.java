@@ -1,4 +1,4 @@
-package com.lgh.dto;
+package com.lgh.model;
 
 
 import com.lgh.constant.CommandCode;

@@ -1,4 +1,4 @@
-package com.lgh.dto;
+package com.lgh.model;
 
 public class CommandResponse {
 	private byte responseCode=-1;

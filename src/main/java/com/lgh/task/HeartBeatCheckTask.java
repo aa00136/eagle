@@ -1,6 +1,6 @@
 package com.lgh.task;
 
-import com.lgh.dto.PingCommand;
+import com.lgh.model.PingCommand;
 import io.netty.channel.ChannelHandlerContext;
 
 public class HeartBeatCheckTask implements Runnable {

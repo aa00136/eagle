@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.lgh.client.CommandClient;
 import com.lgh.constant.CommandCode;
-import com.lgh.dto.Command;
+import com.lgh.model.Command;
 import com.lgh.task.ReconnectTask;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.channel.ChannelHandler.Sharable;

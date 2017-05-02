@@ -1,4 +1,4 @@
-package com.lgh.dto;
+package com.lgh.model;
 
 import java.io.UnsupportedEncodingException;
 
