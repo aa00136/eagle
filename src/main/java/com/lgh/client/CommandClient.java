@@ -9,9 +9,9 @@ import com.google.gson.JsonObject;
 
 import com.lgh.constant.ClientConfig;
 import com.lgh.constant.CommandCode;
-import com.lgh.model.Command;
-import com.lgh.model.CommandResponse;
-import com.lgh.handler.comman.ClientCommandHandler;
+import com.lgh.model.command.Command;
+import com.lgh.model.command.CommandResponse;
+import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;
 import com.lgh.handler.heartbeat.ClientHeartBeatHandler;
@@ -105,6 +105,26 @@ public class CommandClient {
 		}
 		return new CommandResponse(resCmd.getResponseCode(), resCmd.getBody());
 	}
+
+	public CommandResponse subscribe(String message, boolean sync){
+		Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ,message);
+		SyncResponseFuture<Command>future=new SyncResponseFuture<Command>();
+		futureMap.put(cmd.getRequestId(), future);
+		channel.writeAndFlush(cmd);
+
+		Command resCmd=null;
+		try {
+			resCmd=future.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+		if(resCmd==null){
+			return null;
+		}
+		return new CommandResponse(resCmd.getResponseCode(), resCmd.getBody());
+	}
 	
 	public void close(){
 		channel.disconnect();
@@ -156,9 +176,9 @@ public class CommandClient {
 		}
 		Thread.sleep(10000);
 		JsonObject json=new JsonObject();
-		json.addProperty("name", "lgh");
-		json.addProperty("sex", "man");
-		CommandResponse response=client.sendMessage(json.toString(), true);
+		json.addProperty("topic_name", "test");
+		json.addProperty("client_name", "lgh");
+		CommandResponse response=client.subscribe(json.toString(), true);
 		System.out.println(response.getMessage());
 	}
 }

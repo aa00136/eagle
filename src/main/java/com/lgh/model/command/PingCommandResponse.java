@@ -1,7 +1,8 @@
-package com.lgh.model;
+package com.lgh.model.command;
 
 
 import com.lgh.constant.CommandCode;
+import com.lgh.model.command.Command;
 
 public class PingCommandResponse extends Command {
 

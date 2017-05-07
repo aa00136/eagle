@@ -6,13 +6,14 @@ import com.huisa.common.reflection.annotations.huisadb_ignore;
 import java.util.Date;
 
 /*  */
-@huisadb_alias("message")
-public class Message {
+@huisadb_alias("consume_record")
+public class ConsumeRecord {
 	@huisadb_ignore
 	private Integer id;//remark:;length:10; not null,default:null
-	@huisadb_alias("topic_name")
-	private String topicName;//remark:;length:64; not null,default:null
-	private String content;//remark:;length:256
+	@huisadb_alias("topic_id")
+	private Integer topicId;//remark:;length:10; not null,default:null
+	@huisadb_alias("message_id")
+	private Integer messageId;//remark:;length:10; not null,default:null
 	@huisadb_alias("status")
 	private Integer status;//remark:;length:10; not null,default:null
 	@huisadb_alias("create_time")
@@ -20,7 +21,7 @@ public class Message {
 	@huisadb_alias("update_time")
 	private Date updateTime;//remark:;length:19; not null,default:null
 
-	public Message() {
+	public ConsumeRecord() {
 	}
 
 	public void setId(Integer id) {
@@ -31,20 +32,20 @@ public class Message {
 		return id;
 	}
 
-	public String getTopicName() {
-		return topicName;
+	public void setTopicId(Integer topicId) {
+		this.topicId = topicId;
 	}
 
-	public void setTopicName(String topicName) {
-		this.topicName = topicName;
+	public Integer getTopicId() {
+		return topicId;
 	}
 
-	public void setContent(String content) {
-		this.content = content;
+	public void setMessageId(Integer messageId) {
+		this.messageId = messageId;
 	}
 
-	public String getContent() {
-		return content;
+	public Integer getMessageId() {
+		return messageId;
 	}
 
 	public void setCreateTime(Date createTime) {
@@ -61,13 +62,5 @@ public class Message {
 
 	public Date getUpdateTime() {
 		return updateTime;
-	}
-
-	public Integer getStatus() {
-		return status;
-	}
-
-	public void setStatus(Integer status) {
-		this.status = status;
 	}
 }

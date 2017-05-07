@@ -1,4 +1,6 @@
-package com.lgh.model;
+package com.lgh.model.command;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.UnsupportedEncodingException;
 
@@ -36,14 +38,14 @@ public class Command {
 	}
 
 	public int getBodyLength() throws UnsupportedEncodingException {
-		if (body != null && !body.isEmpty()) {
+		if (StringUtils.isNotBlank(body)) {
 			return body.getBytes("utf-8").length;
 		}
 		return 0;
 	}
 
 	public byte getExtentionLength() throws UnsupportedEncodingException {
-		if (extention != null && !extention.isEmpty()) {
+		if (StringUtils.isNotBlank(extention)) {
 			return (byte) extention.getBytes("utf-8").length;
 		}
 		return 0;

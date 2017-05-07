@@ -1,4 +1,4 @@
-package com.lgh.model;
+package com.lgh.model.command;
 
 public class CommandResponse {
 	private byte responseCode=-1;

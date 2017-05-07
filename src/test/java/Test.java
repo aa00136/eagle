@@ -12,9 +12,9 @@ public class Test {
 		try {
 			new BaseDao()
 					.generateJavaBean(
-							"publish_subcribe_relation",
+							"subscriber",
 							"E:\\学习资料\\大学\\课程资料\\毕业设计\\eagle\\src\\test\\java",
-							"com.cscw");
+							"com.lgh");
 		} catch (ServiceException e) {
 		}
 	}

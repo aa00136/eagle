@@ -1,4 +1,4 @@
-package com.lgh.handler.comman;
+package com.lgh.handler.command;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 import com.lgh.client.CommandClient;
 import com.lgh.constant.CommandCode;
-import com.lgh.model.Command;
+import com.lgh.model.command.Command;
 import com.lgh.task.ReconnectTask;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.channel.ChannelHandler.Sharable;

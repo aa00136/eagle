@@ -1,6 +1,6 @@
 package com.lgh.server;
 
-import com.lgh.handler.comman.ServerCommandHandler;
+import com.lgh.handler.command.ServerCommandHandler;
 import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;
 import com.lgh.handler.heartbeat.ServerHeartBeatHandler;

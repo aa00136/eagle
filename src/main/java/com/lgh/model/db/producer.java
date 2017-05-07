@@ -12,6 +12,8 @@ public class Producer {
 	private Integer id;//remark:;length:10; not null,default:null
 	private String name;//remark:;length:64; not null,default:null
 	private Integer status;//remark:;length:3; not null,default:null
+	@huisadb_alias("topic_id")
+	private Integer topicId;//remark:;length:10; not null,default:null
 	@huisadb_alias("create_time")
 	private Date createTime;//remark:;length:19; not null,default:null
 	@huisadb_alias("update_time")
@@ -58,5 +60,13 @@ public class Producer {
 
 	public Date getUpdateTime() {
 		return updateTime;
+	}
+
+	public Integer getTopicId() {
+		return topicId;
+	}
+
+	public void setTopicId(Integer topicId) {
+		this.topicId = topicId;
 	}
 }

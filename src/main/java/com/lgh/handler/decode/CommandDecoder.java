@@ -4,9 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 import com.lgh.constant.CommandCode;
-import com.lgh.model.Command;
-import com.lgh.model.PingAckCommand;
-import com.lgh.model.PingCommand;
+import com.lgh.model.command.*;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
@@ -30,6 +28,9 @@ public class CommandDecoder extends ByteToMessageDecoder {
 			break;
 		case CommandCode.PING_RSP:
 			cmd=new PingAckCommand();
+			break;
+		case CommandCode.SUBSCRIBE_REQ:
+			cmd=new SubscribeCommand();
 			break;
 		default:
 			cmd=new Command();
