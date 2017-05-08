@@ -124,7 +124,7 @@ public class CommandClient {
     }
 
     public List<Message> pull(String topicName, Integer messageCount, boolean sync) {
-        //sendPrePullAck();
+        sendPrePullAck();
 
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topicName);

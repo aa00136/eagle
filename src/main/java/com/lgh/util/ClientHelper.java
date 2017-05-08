@@ -84,7 +84,7 @@ public final class ClientHelper {
 
         public String call() throws Exception {
             List<Message> messageList;
-            client.sendPrePullAck();
+            //client.sendPrePullAck();
             while (true) {
                 messageList = client.pull(topicName, messageCount, true);
                 if (messageList == null || messageList.isEmpty()) {

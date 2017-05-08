@@ -1,13 +1,12 @@
 package com.lgh.handler.decode;
 
-import java.io.UnsupportedEncodingException;
-import java.util.List;
-
-import com.lgh.constant.CommandCode;
-import com.lgh.model.command.*;
+import com.lgh.model.command.Command;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.ByteToMessageDecoder;
+
+import java.io.UnsupportedEncodingException;
+import java.util.List;
 
 public class CommandDecoder extends ByteToMessageDecoder {
 
@@ -20,22 +19,8 @@ public class CommandDecoder extends ByteToMessageDecoder {
 		byte extentionLength=in.readByte();
         String body = readCommandContent(in, bodyLength);
         String extention = readCommandContent(in, extentionLength);
-        
-        Command cmd=null;
-        switch (commandCode) {
-		case CommandCode.PING_REQ:
-			cmd=new PingCommand();
-			break;
-		case CommandCode.PING_RSP:
-			cmd=new PingAckCommand();
-			break;
-		case CommandCode.SUBSCRIBE_REQ:
-			cmd=new SubscribeCommand();
-			break;
-		default:
-			cmd=new Command();
-			break;
-		}
+
+        Command cmd = new Command();
         cmd.setRequestId(requestId);
         cmd.setCommandCode(commandCode);
         cmd.setResponseCode(responseCode);
