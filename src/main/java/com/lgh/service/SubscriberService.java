@@ -38,8 +38,8 @@ public class SubscriberService {
         }
     }
 
-    public static Subscriber getSubscriber(String clientName) throws ServiceException {
-        return subscriberDao.getSubscriberByClientName(clientName);
+    public static Subscriber getSubscriber(String clientName, String topicName) throws ServiceException {
+        return subscriberDao.getByClientNameAndTopicName(clientName, topicName);
     }
 
     public static void updateSubscriber(String clientName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {

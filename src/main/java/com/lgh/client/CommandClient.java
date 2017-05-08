@@ -8,7 +8,9 @@ import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;
 import com.lgh.model.command.Command;
 import com.lgh.model.command.CommandResp;
+import com.lgh.model.db.Message;
 import com.lgh.task.ReconnectTask;
+import com.lgh.util.GsonSerializeUtil;
 import com.lgh.util.IDGenerator;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.bootstrap.Bootstrap;
@@ -18,6 +20,7 @@ import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -118,9 +121,11 @@ public class CommandClient {
         return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
     }
 
-    public CommandResp pull(boolean sync) {
+    public List<Message> pull(String topicName, Integer messageCount, boolean sync) {
         JsonObject json = new JsonObject();
+        json.addProperty("topic_name", topicName);
         json.addProperty("client_name", "lgh");
+        json.addProperty("limit", messageCount);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_REQ, json.toString());
         SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
         futureMap.put(cmd.getRequestId(), future);
@@ -137,12 +142,16 @@ public class CommandClient {
         if (resCmd == null) {
             return null;
         }
-        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+        if (resCmd.getResponseCode() != 1) {
+            return null;
+        }
+
+        return praseMessage(resCmd.getBody());
     }
 
-    public CommandResp publish(String message, boolean sync) {
+    public CommandResp publish(String topicName, String message, boolean sync) {
         JsonObject json = new JsonObject();
-        json.addProperty("topic_name", "test");
+        json.addProperty("topic_name", topicName);
         json.addProperty("content", message);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PUBLISH_REQ, json.toString());
         SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
@@ -184,8 +193,13 @@ public class CommandClient {
         }
         return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
     }
-	
-	public void close(){
+
+    private List<Message> praseMessage(String messageBody) {
+        CommandResp commandResp = GsonSerializeUtil.fromJson(messageBody, CommandResp.class);
+        return commandResp.getData();
+    }
+
+    public void close(){
 		channel.disconnect();
 		channel.close();
 	}
@@ -237,8 +251,8 @@ public class CommandClient {
 		json.addProperty("client_name", "lgh");
         //json.addProperty("content", "test");
         //CommandResp response=client.publish("hello lgh2", true);
-        CommandResp response = client.pull(true);
+        List<Message> messageList = client.pull("test", 3, true);
         //CommandResp response=client.publishTopic("test2", true);
-        System.out.println(response.getMessage());
-	}
+        System.out.println(messageList.get(0).getContent());
+    }
 }

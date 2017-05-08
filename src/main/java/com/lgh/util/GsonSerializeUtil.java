@@ -1,15 +1,15 @@
 package com.lgh.util;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import org.apache.commons.lang3.StringUtils;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class GsonSerializeUtil {
 	private final static Gson GSON = new Gson();
@@ -19,6 +19,14 @@ public class GsonSerializeUtil {
 			return GSON.toJsonTree(obj).getAsJsonObject();
 		} else {
 			return new JsonObject();
+		}
+	}
+
+	public static String toJson(Object obj) {
+		if (obj != null) {
+			return GSON.toJson(obj);
+		} else {
+			return null;
 		}
 	}
 

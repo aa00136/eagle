@@ -11,9 +11,15 @@ public class SubscriberDao extends BaseDao {
     public void addConsumer(Subscriber subscriber) throws ServiceException {
         add(subscriber);
     }
-    public Subscriber getSubscriberByClientName(String clientName) throws ServiceException {
+
+    public Subscriber getByClientName(String clientName) throws ServiceException {
         String sql = "select * from subscriber where name = ?";
         return get(sql,Subscriber.class, clientName);
+    }
+
+    public Subscriber getByClientNameAndTopicName(String clientName, String topicName) throws ServiceException {
+        String sql = "select * from subscriber where name = ? and topic_name = ?";
+        return get(sql, Subscriber.class, clientName, topicName);
     }
 
     public void updateMaxSendMsgId(String clientName, Integer maxSendMsgId) throws ServiceException {

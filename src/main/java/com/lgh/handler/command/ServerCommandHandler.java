@@ -10,6 +10,10 @@ import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @Sharable
 public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
 
@@ -45,8 +49,10 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     ctx.writeAndFlush(subscribeResp);
                     break;
                 case CommandCode.PULL_REQ:
-                    Message message = QueueService.readMessage(cmd);
-                    PullCommandResp pullCommandResp = new PullCommandResp(cmd.getRequestId(), (byte) 1, GsonSerializeUtil.toJsonObject(message).toString());
+                    List<Message> messageList = QueueService.readMessage(cmd);
+                    Map<String, Object> resultMap = new HashMap<String, Object>();
+                    resultMap.put("data", messageList);
+                    PullCommandResp pullCommandResp = new PullCommandResp(cmd.getRequestId(), (byte) 1, GsonSerializeUtil.toJson(resultMap));
                     ctx.writeAndFlush(pullCommandResp);
                     break;
                 case CommandCode.PUBLISH_REQ:

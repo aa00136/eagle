@@ -8,6 +8,7 @@ import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
 import com.lgh.util.GsonSerializeUtil;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,14 +21,18 @@ public class QueueService {
     private static MessageDao messageDao = new MessageDao();
     private static TopicDao topicDao = new TopicDao();
 
-    public static Message readMessage(Command pullCommand) throws ServiceException {
+    public static synchronized List<Message> readMessage(Command pullCommand) throws ServiceException {
         Map<String, Object> body = GsonSerializeUtil.fromJson(pullCommand.getBody());
+        String topicName = (String) body.get("topic_name");
         String clientName = (String) body.get("client_name");
-        Subscriber subscriber = SubscriberService.getSubscriber((String) body.get("client_name"));
-        Message message = messageDao.getMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId());
-        SubscriberService.updateSubscriber(clientName, message.getId(), null);
+        Double messageCont = (Double) body.get("limit");
+        Subscriber subscriber = SubscriberService.getSubscriber(clientName, topicName);
+        List<Message> messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId(), messageCont.intValue());
+        if (messageList != null && messageList.size() > 0) {
+            SubscriberService.updateSubscriber(clientName, messageList.get(messageList.size() - 1).getId(), null);
+        }
 
-        return message;
+        return messageList;
     }
 
     public static void writeMessage(Command publishCommand) throws ServiceException {

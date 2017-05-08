@@ -1,16 +1,19 @@
 import com.huisa.common.database.BaseDao;
 import com.huisa.common.exception.ServiceException;
+import com.lgh.dao.MessageDao;
 import com.lgh.dao.TopicDao;
+import com.lgh.model.db.Message;
 import com.lgh.model.db.Topic;
-import com.lgh.service.SubscriberService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by ligh on 2017/5/6.
  */
 public class TestDao {
     private TopicDao topicDao = new TopicDao();
+    private MessageDao messageDao = new MessageDao();
 
     @org.junit.Test
     public void test1() throws ServiceException {
@@ -20,7 +23,7 @@ public class TestDao {
 
     @org.junit.Test
     public void test2() throws ServiceException {
-        System.out.println(SubscriberService.getSubscriber("lgh").getTopicName());
+        //System.out.println(SubscriberService.getSubscriber("lgh").getTopicName());
     }
 
     @org.junit.Test
@@ -33,5 +36,11 @@ public class TestDao {
                 "  PRIMARY KEY (`id`)\n" +
                 ") ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4;\n";
         new BaseDao().update(sql, new ArrayList<Object>());
+    }
+
+    @org.junit.Test
+    public void test4() throws ServiceException {
+        List<Message> messageList = messageDao.listMessageByMaxMsgId("test", 0, 3);
+        System.out.println(messageList.size());
     }
 }
