@@ -44,7 +44,7 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     ctx.writeAndFlush(resCmd);
                     break;
                 case CommandCode.SUBSCRIBE_REQ:
-                    SubscriberService.addSubscriber((SubscribeCommand) cmd);
+                    SubscriberService.addSubscriber(cmd);
                     SubscribeCommandResp subscribeResp = new SubscribeCommandResp(cmd.getRequestId(), (byte) 1, "subscribe success");
                     ctx.writeAndFlush(subscribeResp);
                     break;
@@ -64,6 +64,9 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     QueueService.createTopic(cmd);
                     PublishTopicCommandResp publishTopicCommandResp = new PublishTopicCommandResp(cmd.getRequestId(), (byte) 1, "publish topic success");
                     ctx.writeAndFlush(publishTopicCommandResp);
+                    break;
+                case CommandCode.PULL_ACK_REQ:
+                    QueueService.updateConsumeState(cmd);
                     break;
                 default:
                     break;

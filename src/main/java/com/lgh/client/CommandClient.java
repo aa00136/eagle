@@ -6,6 +6,8 @@ import com.lgh.constant.CommandCode;
 import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;
+import com.lgh.model.ClientContext;
+import com.lgh.model.PullContextData;
 import com.lgh.model.command.Command;
 import com.lgh.model.command.CommandResp;
 import com.lgh.model.db.Message;
@@ -122,6 +124,8 @@ public class CommandClient {
     }
 
     public List<Message> pull(String topicName, Integer messageCount, boolean sync) {
+        //sendPrePullAck();
+
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topicName);
         json.addProperty("client_name", "lgh");
@@ -192,6 +196,22 @@ public class CommandClient {
             return null;
         }
         return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
+
+    public void sendPrePullAck() {
+        PullContextData contextData = ClientContext.getAndRemove();
+        if (contextData != null) {
+            contextData.getClient().pullAck(contextData.getTopicName(), contextData.getLastMsgId());
+        }
+    }
+
+    public void pullAck(String topicName, Integer messageId) {
+        JsonObject json = new JsonObject();
+        json.addProperty("topic_name", topicName);
+        json.addProperty("client_name", "lgh");
+        json.addProperty("msg_id", messageId);
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_ACK_REQ, json.toString());
+        channel.writeAndFlush(cmd);
     }
 
     private List<Message> praseMessage(String messageBody) {

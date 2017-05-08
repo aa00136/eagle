@@ -25,11 +25,11 @@ public class QueueService {
         Map<String, Object> body = GsonSerializeUtil.fromJson(pullCommand.getBody());
         String topicName = (String) body.get("topic_name");
         String clientName = (String) body.get("client_name");
-        Double messageCont = (Double) body.get("limit");
+        Double messageCount = (Double) body.get("limit");
         Subscriber subscriber = SubscriberService.getSubscriber(clientName, topicName);
-        List<Message> messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId(), messageCont.intValue());
+        List<Message> messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId(), messageCount.intValue());
         if (messageList != null && messageList.size() > 0) {
-            SubscriberService.updateSubscriber(clientName, messageList.get(messageList.size() - 1).getId(), null);
+            SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);
         }
 
         return messageList;
@@ -43,5 +43,13 @@ public class QueueService {
     public static void createTopic(Command publishTopicCommand) throws ServiceException {
         Map<String, Object> body = GsonSerializeUtil.fromJson(publishTopicCommand.getBody());
         topicDao.createTopic((String) body.get("topic_name"));
+    }
+
+    public static void updateConsumeState(Command pullAckCommand) throws ServiceException {
+        Map<String, Object> body = GsonSerializeUtil.fromJson(pullAckCommand.getBody());
+        String topicName = (String) body.get("topic_name");
+        String clientName = (String) body.get("client_name");
+        Double msg_id = (Double) body.get("msg_id");
+        SubscriberService.updateSubscriber(clientName, topicName, null, msg_id.intValue());
     }
 }

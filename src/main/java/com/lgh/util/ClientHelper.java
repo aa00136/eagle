@@ -2,6 +2,8 @@ package com.lgh.util;
 
 import com.lgh.client.CommandClient;
 import com.lgh.handler.MessageHandler;
+import com.lgh.model.ClientContext;
+import com.lgh.model.PullContextData;
 import com.lgh.model.db.Message;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,7 +50,7 @@ public final class ClientHelper {
             this.messageCount = messageCount;
             this.threadNumber = threadNumber;
 
-            this.pullTaskExecutor = new ThreadPoolExecutor(threadNumber, threadNumber, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(topicList.size() * 3),
+            this.pullTaskExecutor = new ThreadPoolExecutor(threadNumber, threadNumber, 0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue<Runnable>(topicList.size() * 4),
                     new ThreadFactory() {
                         private int count = 1;
 
@@ -82,12 +84,16 @@ public final class ClientHelper {
 
         public String call() throws Exception {
             List<Message> messageList;
+            client.sendPrePullAck();
             while (true) {
                 messageList = client.pull(topicName, messageCount, true);
                 if (messageList == null || messageList.isEmpty()) {
                     break;
                 }
                 handler.handlerMessage(messageList);
+
+                PullContextData pullContextData = new PullContextData(client, topicName, messageList.get(messageList.size() - 1).getId());
+                ClientContext.put(pullContextData);
             }
 
             return topicName;

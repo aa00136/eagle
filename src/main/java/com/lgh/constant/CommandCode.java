@@ -13,4 +13,6 @@ public class CommandCode {
     public static final short PULL_RSP= 10;
     public static final short PUBLISH_TOPIC_REQ = 11;
     public static final short PUBLISH_TOPIC_RSP = 12;
+    public static final short PULL_ACK_REQ = 13;
+    public static final short PULL_ACK_RSP = 14;
 }

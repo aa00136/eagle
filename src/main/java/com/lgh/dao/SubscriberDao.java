@@ -22,13 +22,13 @@ public class SubscriberDao extends BaseDao {
         return get(sql, Subscriber.class, clientName, topicName);
     }
 
-    public void updateMaxSendMsgId(String clientName, Integer maxSendMsgId) throws ServiceException {
-        String sql = "update subscriber set max_send_msg_id = ? where name = ?";
-        update(sql, maxSendMsgId, clientName);
+    public void updateMaxSendMsgId(String clientName, String topicName, Integer maxSendMsgId) throws ServiceException {
+        String sql = "update subscriber set max_send_msg_id = ? where name = ? and topic_name = ?";
+        update(sql, maxSendMsgId, clientName, topicName);
     }
 
-    public void updateMinConsumeMsgId(String clientName, Integer minConsumeMsgId) throws ServiceException {
-        String sql = "update subscriber set min_consume_msg_id = ? where name = ?";
-        update(sql, minConsumeMsgId, clientName);
+    public void updateMinConsumeMsgId(String clientName, String topicName, Integer minConsumeMsgId) throws ServiceException {
+        String sql = "update subscriber set min_consume_msg_id = ? where name = ? and topic_name = ?";
+        update(sql, minConsumeMsgId, clientName, topicName);
     }
 }

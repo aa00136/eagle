@@ -9,18 +9,28 @@ import java.util.Date;
 /*  */
 @huisadb_alias("message")
 public class Message {
-	@huisadb_ignore
-	private Integer id;//remark:;length:10; not null,default:null
+    @SerializedName("id")
+    @huisadb_ignore
+    private Integer id;//remark:;length:10; not null,default:null
+
     @SerializedName("topic_name")
     @huisadb_alias("topic_name")
     private String topicName;//remark:;length:64; not null,default:null
-	private String content;//remark:;length:256
-	@huisadb_alias("status")
-	private Integer status;//remark:;length:10; not null,default:null
-	@huisadb_alias("create_time")
-	private Date createTime;//remark:;length:19; not null,default:null
-	@huisadb_alias("update_time")
-	private Date updateTime;//remark:;length:19; not null,default:null
+
+    @SerializedName("content")
+    private String content;//remark:;length:256
+
+    @SerializedName("status")
+    @huisadb_alias("status")
+    private Integer status;//remark:;length:10; not null,default:null
+
+    @SerializedName("create_time")
+    @huisadb_alias("create_time")
+    private Date createTime;//remark:;length:19; not null,default:null
+
+    @SerializedName("update_time")
+    @huisadb_alias("update_time")
+    private Date updateTime;//remark:;length:19; not null,default:null
 
 	public Message() {
 	}
