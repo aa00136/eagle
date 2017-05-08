@@ -15,4 +15,14 @@ public class SubscriberDao extends BaseDao {
         String sql = "select * from subscriber where name = ?";
         return get(sql,Subscriber.class, clientName);
     }
+
+    public void updateMaxSendMsgId(String clientName, Integer maxSendMsgId) throws ServiceException {
+        String sql = "update subscriber set max_send_msg_id = ? where name = ?";
+        update(sql, maxSendMsgId, clientName);
+    }
+
+    public void updateMinConsumeMsgId(String clientName, Integer minConsumeMsgId) throws ServiceException {
+        String sql = "update subscriber set min_consume_msg_id = ? where name = ?";
+        update(sql, minConsumeMsgId, clientName);
+    }
 }

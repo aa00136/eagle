@@ -2,10 +2,10 @@ package com.lgh.handler.heartbeat;
 
 import com.lgh.constant.CommandCode;
 import com.lgh.model.command.Command;
-import com.lgh.model.command.PingCommandResponse;
+import com.lgh.model.command.PingCommandResp;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelHandler.Sharable;
 
 @Sharable
 public class ServerHeartBeatHandler extends ChannelInboundHandlerAdapter {
@@ -14,8 +14,8 @@ public class ServerHeartBeatHandler extends ChannelInboundHandlerAdapter {
 		if(msg instanceof Command){
 			Command cmd=(Command)msg;
 			if(cmd.getCommandCode()== CommandCode.PING_REQ){
-				PingCommandResponse cmdRes=new PingCommandResponse(cmd.getRequestId());
-				ctx.writeAndFlush(cmdRes);
+                PingCommandResp cmdRes = new PingCommandResp(cmd.getRequestId());
+                ctx.writeAndFlush(cmdRes);
 			}
 		}
         ctx.fireChannelRead(msg);

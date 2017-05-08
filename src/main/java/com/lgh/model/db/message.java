@@ -1,5 +1,6 @@
 package com.lgh.model.db;
 
+import com.google.gson.annotations.SerializedName;
 import com.huisa.common.reflection.annotations.huisadb_alias;
 import com.huisa.common.reflection.annotations.huisadb_ignore;
 
@@ -10,8 +11,9 @@ import java.util.Date;
 public class Message {
 	@huisadb_ignore
 	private Integer id;//remark:;length:10; not null,default:null
-	@huisadb_alias("topic_name")
-	private String topicName;//remark:;length:64; not null,default:null
+    @SerializedName("topic_name")
+    @huisadb_alias("topic_name")
+    private String topicName;//remark:;length:64; not null,default:null
 	private String content;//remark:;length:256
 	@huisadb_alias("status")
 	private Integer status;//remark:;length:10; not null,default:null

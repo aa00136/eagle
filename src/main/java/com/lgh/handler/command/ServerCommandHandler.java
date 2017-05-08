@@ -6,9 +6,9 @@ import com.lgh.model.db.Message;
 import com.lgh.service.QueueService;
 import com.lgh.service.SubscriberService;
 import com.lgh.util.GsonSerializeUtil;
+import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelHandler.Sharable;
 
 @Sharable
 public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
@@ -41,13 +41,23 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     break;
                 case CommandCode.SUBSCRIBE_REQ:
                     SubscriberService.addSubscriber((SubscribeCommand) cmd);
-                    SubscribeCommandResponse subscribeResp=new SubscribeCommandResponse(cmd.getRequestId(),(byte)1, "subscribe success");
+                    SubscribeCommandResp subscribeResp = new SubscribeCommandResp(cmd.getRequestId(), (byte) 1, "subscribe success");
                     ctx.writeAndFlush(subscribeResp);
                     break;
                 case CommandCode.PULL_REQ:
-                    Message message = QueueService.readMessage((PullCommand) cmd);
-                    PullCommandResponse pullCommandResponse = new PullCommandResponse(cmd.getRequestId(),(byte)1, GsonSerializeUtil.toJsonObject(message).toString());
-                    ctx.writeAndFlush(pullCommandResponse);
+                    Message message = QueueService.readMessage(cmd);
+                    PullCommandResp pullCommandResp = new PullCommandResp(cmd.getRequestId(), (byte) 1, GsonSerializeUtil.toJsonObject(message).toString());
+                    ctx.writeAndFlush(pullCommandResp);
+                    break;
+                case CommandCode.PUBLISH_REQ:
+                    QueueService.writeMessage(cmd);
+                    PublishCommandResp publishCommandResp = new PublishCommandResp(cmd.getRequestId(), (byte) 1, "publish success");
+                    ctx.writeAndFlush(publishCommandResp);
+                    break;
+                case CommandCode.PUBLISH_TOPIC_REQ:
+                    QueueService.createTopic(cmd);
+                    PublishTopicCommandResp publishTopicCommandResp = new PublishTopicCommandResp(cmd.getRequestId(), (byte) 1, "publish topic success");
+                    ctx.writeAndFlush(publishTopicCommandResp);
                     break;
                 default:
                     break;

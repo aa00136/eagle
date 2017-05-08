@@ -5,8 +5,8 @@ import com.lgh.constant.CommandCode;
 /**
  * Created by ligh on 2017/5/6.
  */
-public class SubscribeCommandResponse extends Command{
-    public SubscribeCommandResponse(int requestId, byte responseCode, String message) {
+public class SubscribeCommandResp extends Command {
+    public SubscribeCommandResp(int requestId, byte responseCode, String message) {
         this.requestId = requestId;
         this.commandCode = CommandCode.SUBSCRIBE_RSP;
         this.responseCode = responseCode;

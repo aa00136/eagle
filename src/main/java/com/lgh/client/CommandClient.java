@@ -1,34 +1,26 @@
 package com.lgh.client;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import com.google.gson.JsonObject;
-
 import com.lgh.constant.ClientConfig;
 import com.lgh.constant.CommandCode;
-import com.lgh.model.command.Command;
-import com.lgh.model.command.CommandResponse;
 import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandDecoder;
 import com.lgh.handler.encode.CommandEncoder;
-import com.lgh.handler.heartbeat.ClientHeartBeatHandler;
-import com.lgh.handler.heartbeat.ClientIdleStateTrigger;
+import com.lgh.model.command.Command;
+import com.lgh.model.command.CommandResp;
 import com.lgh.task.ReconnectTask;
 import com.lgh.util.IDGenerator;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelFutureListener;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
-import io.netty.handler.timeout.IdleStateHandler;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 
 public class CommandClient {
@@ -50,12 +42,12 @@ public class CommandClient {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ChannelPipeline pipeline = ch.pipeline();
-						pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
-						pipeline.addLast("CommandEncoder", new CommandEncoder());
+                        //pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
+                        pipeline.addLast("CommandEncoder", new CommandEncoder());
 						pipeline.addLast("CommandDecoder", new CommandDecoder());
-						pipeline.addLast("ClientIdleStateTrigger",new ClientIdleStateTrigger());
-						pipeline.addLast("ClientHeartbeatHandler",new ClientHeartBeatHandler());
-						pipeline.addLast("ClientCommandHandler", new ClientCommandHandler(CommandClient.this,futureMap));
+                        //pipeline.addLast("ClientIdleStateTrigger",new ClientIdleStateTrigger());
+                        //pipeline.addLast("ClientHeartbeatHandler",new ClientHeartBeatHandler());
+                        pipeline.addLast("ClientCommandHandler", new ClientCommandHandler(CommandClient.this,futureMap));
 					}
 				});
 	}
@@ -85,9 +77,9 @@ public class CommandClient {
 			}
 		});
 	}
-	
-	public CommandResponse sendMessage(String message, boolean sync){
-		Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.CUSTOM_REQ,message);
+
+    public CommandResp sendMessage(String message, boolean sync) {
+        Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.CUSTOM_REQ,message);
 		SyncResponseFuture<Command>future=new SyncResponseFuture<Command>();
 		futureMap.put(cmd.getRequestId(), future);
 		channel.writeAndFlush(cmd);
@@ -103,11 +95,11 @@ public class CommandClient {
 		if(resCmd==null){
 			return null;
 		}
-		return new CommandResponse(resCmd.getResponseCode(), resCmd.getBody());
-	}
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
 
-	public CommandResponse subscribe(String message, boolean sync){
-		Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ,message);
+    public CommandResp subscribe(String message, boolean sync) {
+        Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ,message);
 		SyncResponseFuture<Command>future=new SyncResponseFuture<Command>();
 		futureMap.put(cmd.getRequestId(), future);
 		channel.writeAndFlush(cmd);
@@ -123,8 +115,75 @@ public class CommandClient {
 		if(resCmd==null){
 			return null;
 		}
-		return new CommandResponse(resCmd.getResponseCode(), resCmd.getBody());
-	}
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
+
+    public CommandResp pull(boolean sync) {
+        JsonObject json = new JsonObject();
+        json.addProperty("client_name", "lgh");
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_REQ, json.toString());
+        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
+        futureMap.put(cmd.getRequestId(), future);
+        channel.writeAndFlush(cmd);
+
+        Command resCmd = null;
+        try {
+            resCmd = future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (resCmd == null) {
+            return null;
+        }
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
+
+    public CommandResp publish(String message, boolean sync) {
+        JsonObject json = new JsonObject();
+        json.addProperty("topic_name", "test");
+        json.addProperty("content", message);
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PUBLISH_REQ, json.toString());
+        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
+        futureMap.put(cmd.getRequestId(), future);
+        channel.writeAndFlush(cmd);
+
+        Command resCmd = null;
+        try {
+            resCmd = future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (resCmd == null) {
+            return null;
+        }
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
+
+    public CommandResp publishTopic(String topic, boolean sync) {
+        JsonObject json = new JsonObject();
+        json.addProperty("topic_name", topic);
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PUBLISH_TOPIC_REQ, json.toString());
+        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
+        futureMap.put(cmd.getRequestId(), future);
+        channel.writeAndFlush(cmd);
+
+        Command resCmd = null;
+        try {
+            resCmd = future.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (resCmd == null) {
+            return null;
+        }
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+    }
 	
 	public void close(){
 		channel.disconnect();
@@ -174,11 +233,12 @@ public class CommandClient {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		Thread.sleep(10000);
 		JsonObject json=new JsonObject();
-		json.addProperty("topic_name", "test");
 		json.addProperty("client_name", "lgh");
-		CommandResponse response=client.subscribe(json.toString(), true);
-		System.out.println(response.getMessage());
+        //json.addProperty("content", "test");
+        //CommandResp response=client.publish("hello lgh2", true);
+        CommandResp response = client.pull(true);
+        //CommandResp response=client.publishTopic("test2", true);
+        System.out.println(response.getMessage());
 	}
 }

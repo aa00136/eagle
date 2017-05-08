@@ -1,11 +1,11 @@
 package com.lgh.model.command;
 
-public class CommandResponse {
-	private byte responseCode=-1;
+public class CommandResp {
+    private byte responseCode=-1;
 	private String message;
-	
-	public CommandResponse(byte responseCode, String message) {
-		super();
+
+    public CommandResp(byte responseCode, String message) {
+        super();
 		this.responseCode = responseCode;
 		this.message = message;
 	}

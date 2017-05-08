@@ -42,4 +42,12 @@ public class SubscriberService {
         return subscriberDao.getSubscriberByClientName(clientName);
     }
 
+    public static void updateSubscriber(String clientName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {
+        if (maxSendMsgId != null) {
+            subscriberDao.updateMaxSendMsgId(clientName, maxSendMsgId);
+        }
+        if (minConsumeMsgId != null) {
+            subscriberDao.updateMinConsumeMsgId(clientName, minConsumeMsgId);
+        }
+    }
 }

@@ -1,9 +1,5 @@
 package com.lgh.handler.command;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-
 import com.lgh.client.CommandClient;
 import com.lgh.constant.CommandCode;
 import com.lgh.model.command.Command;
@@ -12,6 +8,10 @@ import com.lgh.util.SyncResponseFuture;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Sharable
@@ -40,8 +40,8 @@ public class ClientCommandHandler extends ChannelInboundHandlerAdapter {
 	public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
 		if (msg instanceof Command) {
 			Command cmd = (Command) msg;
-			if (cmd.getCommandCode() == CommandCode.CUSTOM_RSP) {
-				SyncResponseFuture<Command>future=futureMap.remove(cmd.getRequestId());
+            if (cmd.getCommandCode() != CommandCode.PING_RSP) {
+                SyncResponseFuture<Command>future=futureMap.remove(cmd.getRequestId());
 				future.setResponse(cmd);
 			}
 		}
