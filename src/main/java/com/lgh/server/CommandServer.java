@@ -1,7 +1,7 @@
 package com.lgh.server;
 
 import com.lgh.handler.command.ServerCommandHandler;
-import com.lgh.handler.decode.CommandDecoder;
+import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
@@ -28,8 +28,10 @@ public class CommandServer {
 						ChannelPipeline pipeline = ch.pipeline();
                         //pipeline.addLast("IdleStateHandler",new IdleStateHandler(0, 0, 5));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
-						pipeline.addLast("CommandDecoder", new CommandDecoder());
-                        //pipeline.addLast("ServerIdleStateTrigger",new ServerIdleStateTrigger());
+						pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
+						//pipeline.addLast("CommandDecoder", new CommandFrameDecoder(1024 * 1024, 7, 0));
+						//pipeline.addLast("CommandDecoder", new CommandDecoder());
+						//pipeline.addLast("ServerIdleStateTrigger",new ServerIdleStateTrigger());
                         //pipeline.addLast("ServerHeartBeatHandler",new ServerHeartBeatHandler());
                         pipeline.addLast("ServerCommandHandler", new ServerCommandHandler());
 					}

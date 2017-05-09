@@ -4,7 +4,7 @@ import com.google.gson.JsonObject;
 import com.lgh.constant.ClientConfig;
 import com.lgh.constant.CommandCode;
 import com.lgh.handler.command.ClientCommandHandler;
-import com.lgh.handler.decode.CommandDecoder;
+import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
 import com.lgh.model.ClientContext;
 import com.lgh.model.PullContextData;
@@ -21,6 +21,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,7 +50,9 @@ public class CommandClient {
 						ChannelPipeline pipeline = ch.pipeline();
                         //pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
-						pipeline.addLast("CommandDecoder", new CommandDecoder());
+                        //pipeline.addLast("CommandDecoder", new CommandDecoder());
+                        //pipeline.addLast("CommandDecoder", new CommandFrameDecoder(1024 * 1024, 7, 0));
+                        pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
                         //pipeline.addLast("ClientIdleStateTrigger",new ClientIdleStateTrigger());
                         //pipeline.addLast("ClientHeartbeatHandler",new ClientHeartBeatHandler());
                         pipeline.addLast("ClientCommandHandler", new ClientCommandHandler(CommandClient.this,futureMap));
@@ -215,7 +218,11 @@ public class CommandClient {
     }
 
     private List<Message> praseMessage(String messageBody) {
+        if (messageBody == null) {
+            return new ArrayList<Message>();
+        }
         CommandResp commandResp = GsonSerializeUtil.fromJson(messageBody, CommandResp.class);
+
         return commandResp.getData();
     }
 

@@ -1,5 +1,4 @@
 import com.lgh.client.CommandClient;
-import com.lgh.handler.MessageHandler;
 import com.lgh.handler.MessageHandlerImp;
 import com.lgh.util.ClientHelper;
 
@@ -8,6 +7,21 @@ import com.lgh.util.ClientHelper;
  */
 public class TestClient {
     @org.junit.Test
+    public void testPullTask() throws InterruptedException {
+        CommandClient client = new CommandClient("localhost", 8000);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 5, 200, 1);
+
+        while (true) {
+
+        }
+    }
+
+    @org.junit.Test
     public void testPull() throws InterruptedException {
         CommandClient client = new CommandClient("localhost", 8000);
         try {
@@ -15,8 +29,7 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        MessageHandler messageHandler = new MessageHandlerImp();
-        ClientHelper.startPullTask(client, "test", messageHandler, 2, 100, 1);
+        client.pull("test", 5, true);
 
         while (true) {
 
@@ -31,8 +44,19 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        for (int i = 0; i < 1000; i++) {
-            client.publish("test", "hello lgh " + i, true);
+        //for (int i = 4002; i < 5000; i++) {
+        client.publish("test", "hello lgh 5006", true);
+        //}
+    }
+
+    @org.junit.Test
+    public void testPullAck() {
+        CommandClient client = new CommandClient("localhost", 8000);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
+        client.pullAck("test", 3);
     }
 }

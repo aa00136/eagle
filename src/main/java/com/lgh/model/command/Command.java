@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
 public class Command {
 	protected int requestId;
 	protected short commandCode;
-	protected byte responseCode = -1;
+	protected byte responseCode = 1;
 	protected int bodyLength;
 	protected byte extentionLength;
 	protected String body;
