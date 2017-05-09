@@ -4,6 +4,7 @@ import com.lgh.client.CommandClient;
 import com.lgh.constant.CommandCode;
 import com.lgh.model.command.Command;
 import com.lgh.task.ReconnectTask;
+import com.lgh.util.Log;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
@@ -27,6 +28,7 @@ public class ClientCommandHandler extends ChannelInboundHandlerAdapter {
 	@Override
 	public void channelActive(ChannelHandlerContext ctx) throws Exception {
 		System.out.println("connect to:" + ctx.channel().remoteAddress());
+		Log.CLIENT_STARTUP.info("connect to:" + ctx.channel().remoteAddress());
 		ctx.fireChannelActive();
 	}
 

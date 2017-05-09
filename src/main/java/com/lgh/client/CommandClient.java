@@ -14,6 +14,7 @@ import com.lgh.model.db.Message;
 import com.lgh.task.ReconnectTask;
 import com.lgh.util.GsonSerializeUtil;
 import com.lgh.util.IDGenerator;
+import com.lgh.util.Log;
 import com.lgh.util.SyncResponseFuture;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
@@ -70,17 +71,20 @@ public class CommandClient {
 				if(future.isSuccess()){
 					reConnectCount=0;
 					System.out.println("connect to server success!");
-					channel=future.channel();
+                    Log.CLIENT_STARTUP.info("connect to server success!");
+                    channel=future.channel();
 				}
 				else{
 					reConnectCount++;
 					if(reConnectCount> ClientConfig.MAX_RECONNECT_COUNT){
 						System.out.println("faild to connect to server after 10 tries!");
-						future.channel().close();
+                        Log.CLIENT_STARTUP.info("faild to connect to server after 10 tries!");
+                        future.channel().close();
 						return ;
 					}
 					System.out.println("faild to connect to server!");
-					future.channel().eventLoop().schedule(new ReconnectTask(CommandClient.this),2,TimeUnit.SECONDS);
+                    Log.CLIENT_STARTUP.info("faild to connect to server!");
+                    future.channel().eventLoop().schedule(new ReconnectTask(CommandClient.this),2,TimeUnit.SECONDS);
 				}
 			}
 		});
@@ -88,42 +92,17 @@ public class CommandClient {
 
     public CommandResp sendMessage(String message, boolean sync) {
         Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.CUSTOM_REQ,message);
-		SyncResponseFuture<Command>future=new SyncResponseFuture<Command>();
-		futureMap.put(cmd.getRequestId(), future);
-		channel.writeAndFlush(cmd);
-		
-		Command resCmd=null;
-		try {
-			 resCmd=future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		if(resCmd==null){
-			return null;
-		}
-        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+
+        return sendCommand(cmd);
     }
 
-    public CommandResp subscribe(String message, boolean sync) {
-        Command cmd=new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ,message);
-		SyncResponseFuture<Command>future=new SyncResponseFuture<Command>();
-		futureMap.put(cmd.getRequestId(), future);
-		channel.writeAndFlush(cmd);
+    public CommandResp subscribe(String topicName, boolean sync) {
+        JsonObject json = new JsonObject();
+        json.addProperty("topic_name", topicName);
+        json.addProperty("client_name", "lgh");
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ, json.toString());
 
-		Command resCmd=null;
-		try {
-			resCmd=future.get();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			e.printStackTrace();
-		}
-		if(resCmd==null){
-			return null;
-		}
-        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+        return sendCommand(cmd);
     }
 
     public List<Message> pull(String topicName, Integer messageCount, boolean sync) {
@@ -134,26 +113,9 @@ public class CommandClient {
         json.addProperty("client_name", "lgh");
         json.addProperty("limit", messageCount);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_REQ, json.toString());
-        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
-        futureMap.put(cmd.getRequestId(), future);
-        channel.writeAndFlush(cmd);
+        CommandResp commandResp = sendCommand(cmd);
 
-        Command resCmd = null;
-        try {
-            resCmd = future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        if (resCmd == null) {
-            return null;
-        }
-        if (resCmd.getResponseCode() != 1) {
-            return null;
-        }
-
-        return praseMessage(resCmd.getBody());
+        return praseMessage(commandResp.getMessage());
     }
 
     public CommandResp publish(String topicName, String message, boolean sync) {
@@ -161,44 +123,16 @@ public class CommandClient {
         json.addProperty("topic_name", topicName);
         json.addProperty("content", message);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PUBLISH_REQ, json.toString());
-        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
-        futureMap.put(cmd.getRequestId(), future);
-        channel.writeAndFlush(cmd);
 
-        Command resCmd = null;
-        try {
-            resCmd = future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        if (resCmd == null) {
-            return null;
-        }
-        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+        return sendCommand(cmd);
     }
 
     public CommandResp publishTopic(String topic, boolean sync) {
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topic);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PUBLISH_TOPIC_REQ, json.toString());
-        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
-        futureMap.put(cmd.getRequestId(), future);
-        channel.writeAndFlush(cmd);
 
-        Command resCmd = null;
-        try {
-            resCmd = future.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        if (resCmd == null) {
-            return null;
-        }
-        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
+        return sendCommand(cmd);
     }
 
     public void sendPrePullAck() {
@@ -215,6 +149,28 @@ public class CommandClient {
         json.addProperty("msg_id", messageId);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_ACK_REQ, json.toString());
         channel.writeAndFlush(cmd);
+        Log.CLIENT_COMMAND.info("request=" + cmd.toString());
+    }
+
+    private CommandResp sendCommand(Command cmd) {
+        SyncResponseFuture<Command> future = new SyncResponseFuture<Command>();
+        futureMap.put(cmd.getRequestId(), future);
+        channel.writeAndFlush(cmd);
+        Log.CLIENT_COMMAND.info("request=" + cmd.toString());
+
+        Command resCmd = null;
+        try {
+            resCmd = future.get();
+            Log.CLIENT_COMMAND.info("response=" + resCmd.toString());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        if (resCmd == null || resCmd.getResponseCode() != 1) {
+            return null;
+        }
+        return new CommandResp(resCmd.getResponseCode(), resCmd.getBody());
     }
 
     private List<Message> praseMessage(String messageBody) {

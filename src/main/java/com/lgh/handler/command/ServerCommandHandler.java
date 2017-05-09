@@ -6,6 +6,7 @@ import com.lgh.model.db.Message;
 import com.lgh.service.QueueService;
 import com.lgh.service.SubscriberService;
 import com.lgh.util.GsonSerializeUtil;
+import com.lgh.util.Log;
 import io.netty.channel.ChannelHandler.Sharable;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -36,17 +37,21 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     	if(msg instanceof Command){
     		Command cmd=(Command)msg;
-    		System.out.println(msg.toString());
-    		switch (cmd.getCommandCode()) {
+            Log.SERVER_COMMAND.info("request=" + msg.toString());
+            switch (cmd.getCommandCode()) {
                 case CommandCode.CUSTOM_REQ:
                     Command resCmd=new Command(cmd.getRequestId(),CommandCode.CUSTOM_RSP,"sever read message from "+ctx.channel().remoteAddress());
                     resCmd.setResponseCode((byte) 1);
                     ctx.writeAndFlush(resCmd);
+
+                    Log.SERVER_COMMAND.info("response=" + resCmd.toString());
                     break;
                 case CommandCode.SUBSCRIBE_REQ:
                     SubscriberService.addSubscriber(cmd);
                     SubscribeCommandResp subscribeResp = new SubscribeCommandResp(cmd.getRequestId(), (byte) 1, "subscribe success");
                     ctx.writeAndFlush(subscribeResp);
+
+                    Log.SERVER_COMMAND.info("response=" + subscribeResp.toString());
                     break;
                 case CommandCode.PULL_REQ:
                     List<Message> messageList = QueueService.readMessage(cmd);
@@ -54,16 +59,22 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     resultMap.put("data", messageList);
                     PullCommandResp pullCommandResp = new PullCommandResp(cmd.getRequestId(), (byte) 1, GsonSerializeUtil.toJson(resultMap));
                     ctx.writeAndFlush(pullCommandResp);
+
+                    Log.SERVER_COMMAND.info("response=" + pullCommandResp.toString());
                     break;
                 case CommandCode.PUBLISH_REQ:
                     QueueService.writeMessage(cmd);
                     PublishCommandResp publishCommandResp = new PublishCommandResp(cmd.getRequestId(), (byte) 1, "publish success");
                     ctx.writeAndFlush(publishCommandResp);
+
+                    Log.SERVER_COMMAND.info("response=" + publishCommandResp.toString());
                     break;
                 case CommandCode.PUBLISH_TOPIC_REQ:
                     QueueService.createTopic(cmd);
                     PublishTopicCommandResp publishTopicCommandResp = new PublishTopicCommandResp(cmd.getRequestId(), (byte) 1, "publish topic success");
                     ctx.writeAndFlush(publishTopicCommandResp);
+
+                    Log.SERVER_COMMAND.info("response=" + publishTopicCommandResp.toString());
                     break;
                 case CommandCode.PULL_ACK_REQ:
                     QueueService.updateConsumeState(cmd);

@@ -16,14 +16,15 @@ public class TopicDao extends BaseDao{
                 Topic.class, topicName);
     }
 
-    public void createTopic(String topic) throws ServiceException {
-        String sql = "CREATE TABLE `test2` (\n" +
-                "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
-                "  `content` varchar(1000) DEFAULT NULL,\n" +
-                "  `create_time` datetime NOT NULL,\n" +
-                "  `update_time` datetime NOT NULL,\n" +
-                "  PRIMARY KEY (`id`)\n" +
-                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;\n";
+    public void createTopic(String topicName) throws ServiceException {
+        String sqlPattern = "CREATE TABLE `%s` (" +
+                "  `id` int(11) NOT NULL AUTO_INCREMENT," +
+                "  `content` varchar(1000) DEFAULT NULL," +
+                "  `create_time` datetime NOT NULL," +
+                "  `update_time` datetime NOT NULL," +
+                "  PRIMARY KEY (`id`)" +
+                ") ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+        String sql = String.format(sqlPattern, topicName);
         update(sql, new ArrayList<Object>());
     }
 }

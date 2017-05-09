@@ -14,7 +14,7 @@ public class IDGenerator {
      * 
      * @return
      */
-    public static synchronized int getRequestId() {
+    public static int getRequestId() {
         requestIdCounter.compareAndSet(Integer.MAX_VALUE, 1);
          
         return requestIdCounter.getAndIncrement();

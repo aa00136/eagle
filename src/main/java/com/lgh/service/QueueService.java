@@ -21,7 +21,7 @@ public class QueueService {
     private static MessageDao messageDao = new MessageDao();
     private static TopicDao topicDao = new TopicDao();
 
-    public static synchronized List<Message> readMessage(Command pullCommand) throws ServiceException {
+    public synchronized static List<Message> readMessage(Command pullCommand) throws ServiceException {
         Map<String, Object> body = GsonSerializeUtil.fromJson(pullCommand.getBody());
         String topicName = (String) body.get("topic_name");
         String clientName = (String) body.get("client_name");

@@ -3,6 +3,7 @@ package com.lgh.server;
 import com.lgh.handler.command.ServerCommandHandler;
 import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
+import com.lgh.util.Log;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -39,6 +40,7 @@ public class CommandServer {
 		try {
 			ChannelFuture future=bootstrap.bind().sync();
 			System.out.println(CommandServer.class.getName() + " started and listen on " + future.channel().localAddress());
+			Log.SERVER_STARTUP.info(CommandServer.class.getName() + " started and listen on " + future.channel().localAddress());
 			future.channel().closeFuture().sync();
 		} catch (InterruptedException e) {
 			e.printStackTrace();

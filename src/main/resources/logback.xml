@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <jmxConfigurator/>
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%coloredlevel %logger{15} - %message%n%xException{5}</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SERVER_QUEUE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_server/message/PULL-%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SERVER_COMMAND" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_server/command/server_command_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="SERVER_STARTUP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_server/startup_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CLIENT_COMMAND" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_client/command/client_command_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CLIENT_STARTUP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_client/startup_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="server.queue" level="DEBUG" additivity="false">
+        <appender-ref ref="SERVER_QUEUE"/>
+    </logger>
+
+    <logger name="server.command" level="DEBUG" additivity="false">
+        <appender-ref ref="SERVER_COMMAND"/>
+    </logger>
+
+    <logger name="server.startup" level="DEBUG" additivity="false">
+        <appender-ref ref="SERVER_STARTUP"/>
+    </logger>
+
+    <logger name="client.command" level="DEBUG" additivity="false">
+        <appender-ref ref="CLIENT_COMMAND"/>
+    </logger>
+
+    <logger name="client.startup" level="DEBUG" additivity="false">
+        <appender-ref ref="CLIENT_STARTUP"/>
+    </logger>
+
+    <root level="INFO">
+        <appender-ref ref="console"/>
+    </root>
+</configuration>
