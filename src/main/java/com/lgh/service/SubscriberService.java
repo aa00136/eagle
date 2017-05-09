@@ -7,6 +7,7 @@ import com.lgh.model.command.Command;
 import com.lgh.model.db.Subscriber;
 import com.lgh.model.db.Topic;
 import com.lgh.util.GsonSerializeUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.Map;
@@ -23,18 +24,25 @@ public class SubscriberService {
 
     public static void addSubscriber(Command subscribeCommand) throws ServiceException {
         Map<String, Object> subscribeMap = GsonSerializeUtil.fromJson(subscribeCommand.getBody());
-        Topic topic = topicDao.getTopicByName((String) subscribeMap.get("topic_name"));
+        String topicName = (String) subscribeMap.get("topic_name");
+        String clientName = (String) subscribeMap.get("client_name");
+        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName)) {
+            return;
+        }
+
+        Topic topic = topicDao.getTopicByName(topicName);
         if (topic != null) {
-            Subscriber subscriber = new Subscriber();
-            subscriber.setName((String) subscribeMap.get("client_name"));
-            subscriber.setTopicName((String) subscribeMap.get("topic_name"));
-            subscriber.setMaxSendMsgId(0);
-            subscriber.setMinConsumeMsgId(0);
-            subscriber.setStatus(1);
-            subscriber.setCreateTime(new Date());
-            subscriberDao.add(subscriber);
-        } else {
-            throw new ServiceException(-1, "topic not found");
+            Subscriber subscriber = getSubscriber(clientName, topicName);
+            if (subscriber == null) {
+                subscriber = new Subscriber();
+                subscriber.setName(clientName);
+                subscriber.setTopicName(topicName);
+                subscriber.setMaxSendMsgId(0);
+                subscriber.setMinConsumeMsgId(0);
+                subscriber.setStatus(1);
+                subscriber.setCreateTime(new Date());
+                subscriberDao.add(subscriber);
+            }
         }
     }
 
