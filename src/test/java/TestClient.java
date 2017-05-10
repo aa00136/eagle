@@ -33,7 +33,9 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        client.pull("test", 5, true);
+        for (int i = 0; i < 10; i++) {
+            client.pull("tes", 5, true);
+        }
     }
 
     @org.junit.Test

@@ -34,6 +34,9 @@ public class QueueService {
         }
 
         Subscriber subscriber = SubscriberService.getSubscriber(clientName, topicName);
+        if (subscriber == null) {
+            throw new ServiceException(-1, "subscribe mapping not found");
+        }
         List<Message> messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId(), messageCount.intValue());
         if (messageList != null && messageList.size() > 0) {
             SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);

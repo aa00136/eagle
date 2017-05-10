@@ -1,8 +1,10 @@
 package com.lgh.handler.command;
 
+import com.huisa.common.exception.ServiceException;
 import com.lgh.constant.CommandCode;
 import com.lgh.model.command.*;
 import com.lgh.model.db.Message;
+import com.lgh.server.ServerContext;
 import com.lgh.service.QueueService;
 import com.lgh.service.SubscriberService;
 import com.lgh.util.GsonSerializeUtil;
@@ -37,11 +39,11 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
     	if(msg instanceof Command){
     		Command cmd=(Command)msg;
+            ServerContext.put(cmd);
             Log.SERVER_COMMAND.info("request=" + msg.toString());
             switch (cmd.getCommandCode()) {
                 case CommandCode.CUSTOM_REQ:
-                    Command resCmd=new Command(cmd.getRequestId(),CommandCode.CUSTOM_RSP,"sever read message from "+ctx.channel().remoteAddress());
-                    resCmd.setResponseCode((byte) 1);
+                    Command resCmd = new Command(cmd.getRequestId(), CommandCode.CUSTOM_RSP, (byte) 0, "sever read message from " + ctx.channel().remoteAddress());
                     ctx.writeAndFlush(resCmd);
 
                     Log.SERVER_COMMAND.info("response=" + resCmd.toString());
@@ -96,6 +98,12 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
             throws Exception {
+        if (cause instanceof ServiceException) {
+            Command requesCmd = ServerContext.getAndRemove();
+            Command responseCmd = new Command(requesCmd.getRequestId(), requesCmd.getCommandCode(), (byte) 0, cause.getMessage());
+            ctx.writeAndFlush(responseCmd);
+            Log.SERVER_COMMAND.info("response=" + responseCmd.toString());
+        }
         Log.SERVER_ERROR.error(cause.getMessage(), cause);
     }
 }

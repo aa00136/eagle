@@ -5,7 +5,6 @@ import com.lgh.constant.CommandCode;
 import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
-import com.lgh.model.ClientContext;
 import com.lgh.model.PullContextData;
 import com.lgh.model.command.Command;
 import com.lgh.model.command.CommandResp;
@@ -112,6 +111,9 @@ public class CommandClient {
         json.addProperty("limit", messageCount);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_REQ, json.toString());
         CommandResp commandResp = sendCommand(cmd);
+        if (commandResp == null) {
+            return null;
+        }
 
         return praseMessage(commandResp.getMessage());
     }

@@ -1,4 +1,6 @@
-package com.lgh.model;
+package com.lgh.client;
+
+import com.lgh.model.PullContextData;
 
 /**
  * Created by ligh on 2017/5/8.

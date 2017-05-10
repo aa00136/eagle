@@ -84,4 +84,11 @@ public class Command {
 		this.body = body;
 	}
 
+    public Command(int requestId, short commandCode, byte responseCode, String body) {
+        super();
+        this.requestId = requestId;
+        this.commandCode = commandCode;
+        this.responseCode = responseCode;
+        this.body = body;
+    }
 }

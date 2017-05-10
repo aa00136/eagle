@@ -1,8 +1,8 @@
 package com.lgh.util;
 
+import com.lgh.client.ClientContext;
 import com.lgh.client.CommandClient;
 import com.lgh.handler.MessageHandler;
-import com.lgh.model.ClientContext;
 import com.lgh.model.PullContextData;
 import com.lgh.model.db.Message;
 import org.apache.commons.lang3.StringUtils;
