@@ -27,22 +27,25 @@ public class SubscriberService {
         String topicName = (String) subscribeMap.get("topic_name");
         String clientName = (String) subscribeMap.get("client_name");
         if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName)) {
-            return;
+            throw new ServiceException(-1, "client_name or topic_name is blank");
         }
 
         Topic topic = topicDao.getTopicByName(topicName);
         if (topic != null) {
             Subscriber subscriber = getSubscriber(clientName, topicName);
             if (subscriber == null) {
+                Integer maxId = topicDao.getQueueMaxMsgId(topicName);
                 subscriber = new Subscriber();
                 subscriber.setName(clientName);
                 subscriber.setTopicName(topicName);
-                subscriber.setMaxSendMsgId(0);
-                subscriber.setMinConsumeMsgId(0);
+                subscriber.setMaxSendMsgId(maxId);
+                subscriber.setMinConsumeMsgId(maxId);
                 subscriber.setStatus(1);
                 subscriber.setCreateTime(new Date());
                 subscriberDao.addSubscriber(subscriber);
             }
+        } else {
+            throw new ServiceException(-1, "topic is not exist");
         }
     }
 
@@ -68,7 +71,7 @@ public class SubscriberService {
 
     public static void deleteSubscriber(String clientName, String topicName) throws ServiceException {
         if (StringUtils.isBlank(clientName) || StringUtils.isBlank(topicName)) {
-            throw new IllegalArgumentException("client_name or topic_name is blank");
+            throw new ServiceException(-1, "client_name or topic_name is blank");
         }
         subscriberDao.deleteSubscriber(clientName, topicName);
     }

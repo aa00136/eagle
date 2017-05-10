@@ -7,7 +7,7 @@ import com.lgh.util.ClientHelper;
  * Created by ligh on 2017/5/8.
  */
 public class TestClient {
-    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh");
+    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh4");
 
     @org.junit.Test
     public void testPullTask() throws InterruptedException {

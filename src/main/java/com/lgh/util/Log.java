@@ -12,4 +12,6 @@ public class Log {
     public static final Logger CLIENT_COMMAND = LoggerFactory.getLogger("client.command");
     public static final Logger SERVER_STARTUP = LoggerFactory.getLogger("server.startup");
     public static final Logger CLIENT_STARTUP = LoggerFactory.getLogger("client.startup");
+    public static final Logger SERVER_ERROR = LoggerFactory.getLogger("server.error");
+    public static final Logger CLIENT_ERROR = LoggerFactory.getLogger("client.error");
 }

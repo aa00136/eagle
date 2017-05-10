@@ -92,4 +92,10 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
     	}
         ctx.fireChannelRead(msg);
     }
+
+    @Override
+    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+            throws Exception {
+        Log.SERVER_ERROR.error(cause.getMessage(), cause);
+    }
 }

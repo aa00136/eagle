@@ -31,4 +31,9 @@ public class TopicDao extends BaseDao{
         String sql = String.format(sqlPattern, topicName);
         update(sql, new ArrayList<Object>());
     }
+
+    public Integer getQueueMaxMsgId(String topicName) throws ServiceException {
+        String sql = "SELECT max(id) as max_id from " + topicName;
+        return (Integer) getRowSet(sql, new ArrayList<Object>()).get("max_id");
+    }
 }

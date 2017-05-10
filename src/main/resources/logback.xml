@@ -28,6 +28,7 @@
     </appender>
 
     <appender name="SERVER_STARTUP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/eagle_server/startup.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/eagle_server/startup_%d{yyyyMMddHH}.log</fileNamePattern>
             <maxHistory>144</maxHistory>
@@ -36,6 +37,18 @@
             <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
         </encoder>
     </appender>
+
+    <appender name="SERVER_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/eagle_server/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_server/error_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
 
     <appender name="CLIENT_COMMAND" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
@@ -48,8 +61,20 @@
     </appender>
 
     <appender name="CLIENT_STARTUP" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/eagle_client/startup.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>logs/eagle_client/startup_%d{yyyyMMddHH}.log</fileNamePattern>
+            <maxHistory>144</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%date - %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="CLIENT_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>logs/eagle_client/error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>logs/eagle_client/error_%d{yyyyMMddHH}.log</fileNamePattern>
             <maxHistory>144</maxHistory>
         </rollingPolicy>
         <encoder>
@@ -69,12 +94,20 @@
         <appender-ref ref="SERVER_STARTUP"/>
     </logger>
 
+    <logger name="server.error" level="DEBUG" additivity="false">
+        <appender-ref ref="SERVER_ERROR"/>
+    </logger>
+
     <logger name="client.command" level="DEBUG" additivity="false">
         <appender-ref ref="CLIENT_COMMAND"/>
     </logger>
 
     <logger name="client.startup" level="DEBUG" additivity="false">
         <appender-ref ref="CLIENT_STARTUP"/>
+    </logger>
+
+    <logger name="client.error" level="DEBUG" additivity="false">
+        <appender-ref ref="CLIENT_ERROR"/>
     </logger>
 
     <root level="INFO">

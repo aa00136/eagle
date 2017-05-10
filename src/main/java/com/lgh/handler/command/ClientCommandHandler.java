@@ -49,10 +49,10 @@ public class ClientCommandHandler extends ChannelInboundHandlerAdapter {
 		}
 		ctx.fireChannelRead(msg);
 	}
-	
+
 	@Override
-    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
-            throws Exception {
-		cause.printStackTrace();
-    }
+	public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause)
+			throws Exception {
+		Log.CLIENT_ERROR.error(cause.getMessage(), cause);
+	}
 }

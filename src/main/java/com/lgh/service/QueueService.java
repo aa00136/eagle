@@ -8,6 +8,7 @@ import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
 import com.lgh.model.db.Topic;
 import com.lgh.util.GsonSerializeUtil;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 import java.util.List;
@@ -28,6 +29,10 @@ public class QueueService {
         String topicName = (String) body.get("topic_name");
         String clientName = (String) body.get("client_name");
         Double messageCount = (Double) body.get("limit");
+        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || messageCount.intValue() <= 0) {
+            throw new ServiceException(-1, "client_name or topic_name or limit is blank");
+        }
+
         Subscriber subscriber = SubscriberService.getSubscriber(clientName, topicName);
         List<Message> messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMaxSendMsgId(), messageCount.intValue());
         if (messageList != null && messageList.size() > 0) {
@@ -39,12 +44,20 @@ public class QueueService {
 
     public static void writeMessage(Command publishCommand) throws ServiceException {
         Message message = GsonSerializeUtil.fromJson(publishCommand.getBody(), Message.class);
+        if (StringUtils.isBlank(message.getTopicName())) {
+            throw new ServiceException(-1, "topic_name is blank");
+        }
+
         messageDao.addMessage(message.getTopicName(), message.getContent());
     }
 
     public static void createTopic(Command publishTopicCommand) throws ServiceException {
         Map<String, Object> body = GsonSerializeUtil.fromJson(publishTopicCommand.getBody());
         String topicName = (String) body.get("topic_name");
+        if (StringUtils.isBlank(topicName)) {
+            throw new ServiceException(-1, "topic_name is blank");
+        }
+
         Topic topic = new Topic();
         topic.setName(topicName);
         topic.setCreateTime(new Date());
@@ -57,6 +70,10 @@ public class QueueService {
         String topicName = (String) body.get("topic_name");
         String clientName = (String) body.get("client_name");
         Double msg_id = (Double) body.get("msg_id");
+        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || msg_id.intValue() <= 0) {
+            throw new ServiceException(-1, "client_name or topic_name or msg_id is blank");
+        }
+
         SubscriberService.updateSubscriber(clientName, topicName, null, msg_id.intValue());
     }
 }

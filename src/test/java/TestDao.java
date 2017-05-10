@@ -43,4 +43,9 @@ public class TestDao {
         List<Message> messageList = messageDao.listMessageByMaxMsgId("test", 0, 3);
         System.out.println(messageList.size());
     }
+
+    @org.junit.Test
+    public void test5() throws ServiceException {
+        System.out.println(topicDao.getQueueMaxMsgId("test"));
+    }
 }
