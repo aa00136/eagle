@@ -1,3 +1,4 @@
+import com.lgh.client.ClientConfig;
 import com.lgh.client.CommandClient;
 import com.lgh.handler.MessageHandlerImp;
 import com.lgh.util.ClientHelper;
@@ -6,14 +7,17 @@ import com.lgh.util.ClientHelper;
  * Created by ligh on 2017/5/8.
  */
 public class TestClient {
+    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh");
+
     @org.junit.Test
     public void testPullTask() throws InterruptedException {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        client.subscribe("test", true);
         ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 10, 1000, 1);
 
         while (true) {
@@ -23,7 +27,7 @@ public class TestClient {
 
     @org.junit.Test
     public void testPull() throws InterruptedException {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
@@ -34,7 +38,7 @@ public class TestClient {
 
     @org.junit.Test
     public void testPublish() throws InterruptedException {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
@@ -47,7 +51,7 @@ public class TestClient {
 
     @org.junit.Test
     public void testPullAck() throws InterruptedException {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
@@ -58,7 +62,7 @@ public class TestClient {
 
     @org.junit.Test
     public void testSubscribe() {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
@@ -69,12 +73,23 @@ public class TestClient {
 
     @org.junit.Test
     public void testPublishTopic() {
-        CommandClient client = new CommandClient("localhost", 8000);
+        CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         client.publishTopic("articcle_update", true);
+    }
+
+    @org.junit.Test
+    public void testUnsubscribe() {
+        CommandClient client = new CommandClient(clientConfig);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        client.unsubscribe("test", true);
     }
 }

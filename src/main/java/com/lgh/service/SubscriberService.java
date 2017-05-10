@@ -41,7 +41,7 @@ public class SubscriberService {
                 subscriber.setMinConsumeMsgId(0);
                 subscriber.setStatus(1);
                 subscriber.setCreateTime(new Date());
-                subscriberDao.add(subscriber);
+                subscriberDao.addSubscriber(subscriber);
             }
         }
     }
@@ -57,5 +57,19 @@ public class SubscriberService {
         if (minConsumeMsgId != null) {
             subscriberDao.updateMinConsumeMsgId(clientName, topicName, minConsumeMsgId);
         }
+    }
+
+    public static void deleteSubscriber(Command unsubscribeCommand) throws ServiceException {
+        Map<String, Object> subscribeMap = GsonSerializeUtil.fromJson(unsubscribeCommand.getBody());
+        String topicName = (String) subscribeMap.get("topic_name");
+        String clientName = (String) subscribeMap.get("client_name");
+        deleteSubscriber(clientName, topicName);
+    }
+
+    public static void deleteSubscriber(String clientName, String topicName) throws ServiceException {
+        if (StringUtils.isBlank(clientName) || StringUtils.isBlank(topicName)) {
+            throw new IllegalArgumentException("client_name or topic_name is blank");
+        }
+        subscriberDao.deleteSubscriber(clientName, topicName);
     }
 }

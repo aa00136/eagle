@@ -1,7 +1,6 @@
 package com.lgh.client;
 
 import com.google.gson.JsonObject;
-import com.lgh.constant.ClientConfig;
 import com.lgh.constant.CommandCode;
 import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandReplayingDecoder;
@@ -31,28 +30,27 @@ import java.util.concurrent.TimeUnit;
 
 
 public class CommandClient {
-	private String host;
-	private int port = 9000;
-	private NioEventLoopGroup group;
+    private ClientConfig clientConfig;
+    private NioEventLoopGroup group;
 	private Bootstrap bootstrap;
 	private Channel channel;
 	private int reConnectCount=0;
 	private Map<Integer,SyncResponseFuture<Command>> futureMap=new HashMap<Integer,SyncResponseFuture<Command>>();
 
-	public CommandClient(String host, int port) {
-		this.host = host;
-		this.port = port;
-		group = new NioEventLoopGroup();
+    public CommandClient(ClientConfig clientConfig) {
+        if (clientConfig == null) {
+            throw new IllegalArgumentException("client config is null");
+        }
+        this.clientConfig = clientConfig;
+        group = new NioEventLoopGroup();
 		bootstrap = new Bootstrap();
-		bootstrap.group(group).channel(NioSocketChannel.class).remoteAddress(host, port)
-				.handler(new ChannelInitializer<SocketChannel>() {
+        bootstrap.group(group).channel(NioSocketChannel.class).remoteAddress(clientConfig.getHost(), clientConfig.getPort())
+                .handler(new ChannelInitializer<SocketChannel>() {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ChannelPipeline pipeline = ch.pipeline();
                         //pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
-                        //pipeline.addLast("CommandDecoder", new CommandDecoder());
-                        //pipeline.addLast("CommandDecoder", new CommandFrameDecoder(1024 * 1024, 7, 0));
                         pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
                         //pipeline.addLast("ClientIdleStateTrigger",new ClientIdleStateTrigger());
                         //pipeline.addLast("ClientHeartbeatHandler",new ClientHeartBeatHandler());
@@ -65,8 +63,8 @@ public class CommandClient {
 		if (channel != null && channel.isActive()) {
 			return;
 		}
-		ChannelFuture future = bootstrap.connect(host, port);
-		future.addListener(new ChannelFutureListener() {
+        ChannelFuture future = bootstrap.connect(clientConfig.getHost(), clientConfig.getPort());
+        future.addListener(new ChannelFutureListener() {
 			public void operationComplete(ChannelFuture future) throws Exception {
 				if(future.isSuccess()){
 					reConnectCount=0;
@@ -99,7 +97,7 @@ public class CommandClient {
     public CommandResp subscribe(String topicName, boolean sync) {
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topicName);
-        json.addProperty("client_name", "lgh");
+        json.addProperty("client_name", clientConfig.getClientName());
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.SUBSCRIBE_REQ, json.toString());
 
         return sendCommand(cmd);
@@ -110,7 +108,7 @@ public class CommandClient {
 
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topicName);
-        json.addProperty("client_name", "lgh");
+        json.addProperty("client_name", clientConfig.getClientName());
         json.addProperty("limit", messageCount);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_REQ, json.toString());
         CommandResp commandResp = sendCommand(cmd);
@@ -145,11 +143,20 @@ public class CommandClient {
     public void pullAck(String topicName, Integer messageId) {
         JsonObject json = new JsonObject();
         json.addProperty("topic_name", topicName);
-        json.addProperty("client_name", "lgh");
+        json.addProperty("client_name", clientConfig.getClientName());
         json.addProperty("msg_id", messageId);
         Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.PULL_ACK_REQ, json.toString());
         channel.writeAndFlush(cmd);
         Log.CLIENT_COMMAND.info("request=" + cmd.toString());
+    }
+
+    public CommandResp unsubscribe(String topicName, boolean sync) {
+        JsonObject json = new JsonObject();
+        json.addProperty("topic_name", topicName);
+        json.addProperty("client_name", clientConfig.getClientName());
+        Command cmd = new Command(IDGenerator.getRequestId(), CommandCode.UNSUBSCRIBE_REQ, json.toString());
+
+        return sendCommand(cmd);
     }
 
     private CommandResp sendCommand(Command cmd) {
@@ -204,28 +211,9 @@ public class CommandClient {
 	}
 
 	public static void main(String[] args) throws InterruptedException {
-		/*ExecutorService executor=Executors.newFixedThreadPool(100);
-		final CountDownLatch latch=new CountDownLatch(100);
-		for(int i=0;i<100;i++){
-			executor.submit(new Runnable() {
-				public void run() {
-					CommandClient client = new CommandClient("localhost", 8000);
-					try {
-						client.connectToServer();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-					System.out.println(Thread.currentThread().getName());
-					client.close();
-					
-					latch.countDown();
-				}
-			});
-		}
-		latch.await();
-		executor.shutdown();*/
-		CommandClient client = new CommandClient("localhost", 8000);
-		try {
+        ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh");
+        CommandClient client = new CommandClient(clientConfig);
+        try {
 			client.connectToServer();
 		} catch (InterruptedException e) {
 			e.printStackTrace();

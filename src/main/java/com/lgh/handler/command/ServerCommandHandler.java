@@ -79,6 +79,13 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                 case CommandCode.PULL_ACK_REQ:
                     QueueService.updateConsumeState(cmd);
                     break;
+                case CommandCode.UNSUBSCRIBE_REQ:
+                    SubscriberService.deleteSubscriber(cmd);
+                    UnsubscribeCommandResp unsubscribeCommandResp = new UnsubscribeCommandResp(cmd.getRequestId(), (byte) 1, "unsubscribe success");
+                    ctx.writeAndFlush(unsubscribeCommandResp);
+
+                    Log.SERVER_COMMAND.info("response=" + unsubscribeCommandResp.toString());
+                    break;
                 default:
                     break;
             }

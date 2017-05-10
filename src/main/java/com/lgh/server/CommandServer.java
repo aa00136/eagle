@@ -30,8 +30,6 @@ public class CommandServer {
                         //pipeline.addLast("IdleStateHandler",new IdleStateHandler(0, 0, 5));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
 						pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
-						//pipeline.addLast("CommandDecoder", new CommandFrameDecoder(1024 * 1024, 7, 0));
-						//pipeline.addLast("CommandDecoder", new CommandDecoder());
 						//pipeline.addLast("ServerIdleStateTrigger",new ServerIdleStateTrigger());
                         //pipeline.addLast("ServerHeartBeatHandler",new ServerHeartBeatHandler());
                         pipeline.addLast("ServerCommandHandler", new ServerCommandHandler());

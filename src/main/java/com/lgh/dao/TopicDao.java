@@ -16,7 +16,11 @@ public class TopicDao extends BaseDao{
                 Topic.class, topicName);
     }
 
-    public void createTopic(String topicName) throws ServiceException {
+    public void addTopic(Topic topic) throws ServiceException {
+        add(topic);
+    }
+
+    public void createQueue(String topicName) throws ServiceException {
         String sqlPattern = "CREATE TABLE `%s` (" +
                 "  `id` int(11) NOT NULL AUTO_INCREMENT," +
                 "  `content` varchar(1000) DEFAULT NULL," +

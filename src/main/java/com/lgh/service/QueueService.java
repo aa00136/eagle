@@ -6,8 +6,10 @@ import com.lgh.dao.TopicDao;
 import com.lgh.model.command.Command;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
+import com.lgh.model.db.Topic;
 import com.lgh.util.GsonSerializeUtil;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,7 +44,12 @@ public class QueueService {
 
     public static void createTopic(Command publishTopicCommand) throws ServiceException {
         Map<String, Object> body = GsonSerializeUtil.fromJson(publishTopicCommand.getBody());
-        topicDao.createTopic((String) body.get("topic_name"));
+        String topicName = (String) body.get("topic_name");
+        Topic topic = new Topic();
+        topic.setName(topicName);
+        topic.setCreateTime(new Date());
+        topicDao.addTopic(topic);
+        topicDao.createQueue(topicName);
     }
 
     public static void updateConsumeState(Command pullAckCommand) throws ServiceException {
