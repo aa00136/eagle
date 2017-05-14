@@ -3,11 +3,14 @@ package com.lgh.server;
 import com.lgh.handler.command.ServerCommandHandler;
 import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
+import com.lgh.handler.heartbeat.ServerHeartBeatHandler;
+import com.lgh.handler.heartbeat.ServerIdleStateTrigger;
 import com.lgh.util.Log;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 
 public class CommandServer {
@@ -27,11 +30,11 @@ public class CommandServer {
 					@Override
 					protected void initChannel(Channel ch) throws Exception {
 						ChannelPipeline pipeline = ch.pipeline();
-                        //pipeline.addLast("IdleStateHandler",new IdleStateHandler(0, 0, 5));
+                        pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 5));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
 						pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
-						//pipeline.addLast("ServerIdleStateTrigger",new ServerIdleStateTrigger());
-                        //pipeline.addLast("ServerHeartBeatHandler",new ServerHeartBeatHandler());
+                        pipeline.addLast("ServerIdleStateTrigger", new ServerIdleStateTrigger());
+                        pipeline.addLast("ServerHeartBeatHandler", new ServerHeartBeatHandler());
                         pipeline.addLast("ServerCommandHandler", new ServerCommandHandler());
 					}
 				});

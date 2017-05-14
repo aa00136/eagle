@@ -5,6 +5,8 @@ import com.lgh.constant.CommandCode;
 import com.lgh.handler.command.ClientCommandHandler;
 import com.lgh.handler.decode.CommandReplayingDecoder;
 import com.lgh.handler.encode.CommandEncoder;
+import com.lgh.handler.heartbeat.ClientHeartBeatHandler;
+import com.lgh.handler.heartbeat.ClientIdleStateTrigger;
 import com.lgh.model.PullContextData;
 import com.lgh.model.command.Command;
 import com.lgh.model.command.CommandResp;
@@ -19,6 +21,7 @@ import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 public class CommandClient {
@@ -48,11 +52,11 @@ public class CommandClient {
 					@Override
 					protected void initChannel(SocketChannel ch) throws Exception {
 						ChannelPipeline pipeline = ch.pipeline();
-                        //pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
+                        pipeline.addLast("IdleStateHandler", new IdleStateHandler(0, 0, 4));
                         pipeline.addLast("CommandEncoder", new CommandEncoder());
                         pipeline.addLast("CommandDecoder", new CommandReplayingDecoder());
-                        //pipeline.addLast("ClientIdleStateTrigger",new ClientIdleStateTrigger());
-                        //pipeline.addLast("ClientHeartbeatHandler",new ClientHeartBeatHandler());
+                        pipeline.addLast("ClientIdleStateTrigger", new ClientIdleStateTrigger());
+                        pipeline.addLast("ClientHeartbeatHandler", new ClientHeartBeatHandler());
                         pipeline.addLast("ClientCommandHandler", new ClientCommandHandler(CommandClient.this,futureMap));
 					}
 				});
@@ -169,11 +173,13 @@ public class CommandClient {
 
         Command resCmd = null;
         try {
-            resCmd = future.get();
+            resCmd = future.get(4, TimeUnit.SECONDS);
             Log.CLIENT_COMMAND.info("response=" + resCmd.toString());
         } catch (InterruptedException e) {
             e.printStackTrace();
         } catch (ExecutionException e) {
+            e.printStackTrace();
+        } catch (TimeoutException e) {
             e.printStackTrace();
         }
         if (resCmd == null || resCmd.getResponseCode() != 1) {
