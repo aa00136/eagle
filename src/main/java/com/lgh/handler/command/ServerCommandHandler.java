@@ -7,6 +7,7 @@ import com.lgh.model.db.Message;
 import com.lgh.server.ServerContext;
 import com.lgh.service.QueueService;
 import com.lgh.service.SubscriberService;
+import com.lgh.service.TopicService;
 import com.lgh.util.GsonSerializeUtil;
 import com.lgh.util.Log;
 import io.netty.channel.ChannelHandler.Sharable;
@@ -72,14 +73,14 @@ public class ServerCommandHandler extends ChannelInboundHandlerAdapter {
                     Log.SERVER_COMMAND.info("response=" + publishCommandResp.toString());
                     break;
                 case CommandCode.PUBLISH_TOPIC_REQ:
-                    QueueService.createTopic(cmd);
+                    TopicService.createTopic(cmd);
                     PublishTopicCommandResp publishTopicCommandResp = new PublishTopicCommandResp(cmd.getRequestId(), (byte) 1, "publish topic success");
                     ctx.writeAndFlush(publishTopicCommandResp);
 
                     Log.SERVER_COMMAND.info("response=" + publishTopicCommandResp.toString());
                     break;
                 case CommandCode.PULL_ACK_REQ:
-                    QueueService.updateConsumeState(cmd);
+                    SubscriberService.updateConsumeState(cmd);
                     break;
                 case CommandCode.UNSUBSCRIBE_REQ:
                     SubscriberService.deleteSubscriber(cmd);

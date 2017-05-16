@@ -75,4 +75,19 @@ public class SubscriberService {
         }
         subscriberDao.deleteSubscriber(clientName, topicName);
     }
+
+    public synchronized static void updateConsumeState(Command pullAckCommand) throws ServiceException {
+        Map<String, Object> body = GsonSerializeUtil.fromJson(pullAckCommand.getBody());
+        String topicName = (String) body.get("topic_name");
+        String clientName = (String) body.get("client_name");
+        Double msg_id = (Double) body.get("msg_id");
+        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || msg_id.intValue() <= 0) {
+            throw new ServiceException(-1, "client_name or topic_name or msg_id is blank");
+        }
+
+        Subscriber subscriber = getSubscriber(clientName, topicName);
+        if (subscriber.getMinConsumeMsgId() < msg_id.intValue()) {
+            updateSubscriber(clientName, topicName, null, msg_id.intValue());
+        }
+    }
 }
