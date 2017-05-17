@@ -50,9 +50,7 @@ public class QueueService {
         }
         List<Message> messageList = new ArrayList<Message>();
         queueBuffer.drainTo(messageList, messageCount.intValue());
-
-        //messageList = messageDao.listMessageByMaxMsgId(subscriber.getTopicName(), subscriber.getMinConsumeMsgId(), messageCount.intValue());
-        if (messageList != null && messageList.size() > 0) {
+        if (messageList.size() > 0) {
             SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);
         }
 
