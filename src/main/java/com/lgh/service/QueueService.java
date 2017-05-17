@@ -2,11 +2,8 @@ package com.lgh.service;
 
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.MessageDao;
-import com.lgh.model.command.Command;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
-import com.lgh.util.GsonSerializeUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,8 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
- * Created by ligh on 2017/4/16.
- */
+ * 消息队列服务
+ *
+ * @author ligh
+ * @create 2017-04-16 20:44
+ **/
 public class QueueService {
     private static ConcurrentHashMap<String, Map<String, LinkedBlockingQueue<Message>>> queueCache = new ConcurrentHashMap<String, Map<String, LinkedBlockingQueue<Message>>>(100);
     private static ConcurrentHashMap<String, Integer> cacheInfo = new ConcurrentHashMap<String, Integer>(100);
@@ -25,15 +25,7 @@ public class QueueService {
     private static int queueLength = 1000;
     private static int waterMark = 500;
 
-    public synchronized static List<Message> readMessage(Command pullCommand) throws ServiceException {
-        Map<String, Object> body = GsonSerializeUtil.fromJson(pullCommand.getBody());
-        String topicName = (String) body.get("topic_name");
-        String clientName = (String) body.get("client_name");
-        Double messageCount = (Double) body.get("limit");
-
-        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || messageCount.intValue() <= 0) {
-            throw new ServiceException(-1, "client_name or topic_name or limit is blank");
-        }
+    public synchronized static List<Message> readMessage(String topicName, String clientName, int limit) throws ServiceException {
         Subscriber subscriber = SubscriberService.getSubscriber(clientName, topicName);
         if (subscriber == null) {
             throw new ServiceException(-1, "subscribe mapping not found");
@@ -45,11 +37,15 @@ public class QueueService {
         }
         LinkedBlockingQueue<Message> queueBuffer = queueMap.get(clientName);
         if (queueBuffer.size() < waterMark) {
-            int loadCacheId = cacheInfo.get(getQueueKey(subscriber.getTopicName(), subscriber.getName()));
-            loadDataFromDB(queueBuffer, subscriber.getTopicName(), subscriber.getName(), loadCacheId);
+            Integer loadCacheId = cacheInfo.get(getQueueKey(subscriber.getTopicName(), subscriber.getName()));
+            if (loadCacheId != null) {
+                loadDataFromDB(queueBuffer, subscriber.getTopicName(), subscriber.getName(), loadCacheId);
+            } else {
+                loadDataFromDB(queueBuffer, subscriber.getTopicName(), subscriber.getName(), subscriber.getMinConsumeMsgId());
+            }
         }
         List<Message> messageList = new ArrayList<Message>();
-        queueBuffer.drainTo(messageList, messageCount.intValue());
+        queueBuffer.drainTo(messageList, limit);
         if (messageList.size() > 0) {
             SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);
         }
@@ -57,12 +53,7 @@ public class QueueService {
         return messageList;
     }
 
-    public static void writeMessage(Command publishCommand) throws ServiceException {
-        Message message = GsonSerializeUtil.fromJson(publishCommand.getBody(), Message.class);
-        if (StringUtils.isBlank(message.getTopicName())) {
-            throw new ServiceException(-1, "topic_name is blank");
-        }
-
+    public static void writeMessage(Message message) throws ServiceException {
         messageDao.addMessage(message.getTopicName(), message.getContent());
     }
 

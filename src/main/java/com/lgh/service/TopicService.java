@@ -2,13 +2,9 @@ package com.lgh.service;
 
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.TopicDao;
-import com.lgh.model.command.Command;
 import com.lgh.model.db.Topic;
-import com.lgh.util.GsonSerializeUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
-import java.util.Map;
 
 /**
  * topic服务
@@ -19,13 +15,7 @@ import java.util.Map;
 public class TopicService {
     private static TopicDao topicDao = new TopicDao();
 
-    public static void createTopic(Command publishTopicCommand) throws ServiceException {
-        Map<String, Object> body = GsonSerializeUtil.fromJson(publishTopicCommand.getBody());
-        String topicName = (String) body.get("topic_name");
-        if (StringUtils.isBlank(topicName)) {
-            throw new ServiceException(-1, "topic_name is blank");
-        }
-
+    public static void createTopic(String topicName) throws ServiceException {
         Topic topic = new Topic();
         topic.setName(topicName);
         topic.setCreateTime(new Date());

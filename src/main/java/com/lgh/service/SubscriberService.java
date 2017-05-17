@@ -3,32 +3,24 @@ package com.lgh.service;
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.SubscriberDao;
 import com.lgh.dao.TopicDao;
-import com.lgh.model.command.Command;
 import com.lgh.model.db.Subscriber;
 import com.lgh.model.db.Topic;
-import com.lgh.util.GsonSerializeUtil;
-import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Created by ligh on 2017/4/16.
- */
+ * 订阅关系服务
+ *
+ * @author ligh
+ * @create 2017-04-16 20:44
+ **/
 public class SubscriberService {
     public static ConcurrentHashMap<String, Subscriber> subscriberCache = new ConcurrentHashMap<String, Subscriber>(100);
     private static TopicDao topicDao = new TopicDao();
     private static SubscriberDao subscriberDao = new SubscriberDao();
 
-    public static void addSubscriber(Command subscribeCommand) throws ServiceException {
-        Map<String, Object> subscribeMap = GsonSerializeUtil.fromJson(subscribeCommand.getBody());
-        String topicName = (String) subscribeMap.get("topic_name");
-        String clientName = (String) subscribeMap.get("client_name");
-        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName)) {
-            throw new ServiceException(-1, "client_name or topic_name is blank");
-        }
-
+    public static void addSubscriber(String topicName, String clientName) throws ServiceException {
         Topic topic = topicDao.getTopicByName(topicName);
         if (topic != null) {
             Subscriber subscriber = getSubscriber(clientName, topicName);
@@ -53,7 +45,9 @@ public class SubscriberService {
         Subscriber subscriber = subscriberCache.get(clientName);
         if (subscriber == null) {
             subscriber = subscriberDao.getByClientNameAndTopicName(clientName, topicName);
-            subscriberCache.put(subscriber.getName(), subscriber);
+            if (subscriber != null) {
+                subscriberCache.put(subscriber.getName(), subscriber);
+            }
         }
         return subscriber;
     }
@@ -68,33 +62,15 @@ public class SubscriberService {
         }
     }
 
-    public static void deleteSubscriber(Command unsubscribeCommand) throws ServiceException {
-        Map<String, Object> subscribeMap = GsonSerializeUtil.fromJson(unsubscribeCommand.getBody());
-        String topicName = (String) subscribeMap.get("topic_name");
-        String clientName = (String) subscribeMap.get("client_name");
-        deleteSubscriber(clientName, topicName);
-    }
-
-    public static void deleteSubscriber(String clientName, String topicName) throws ServiceException {
-        if (StringUtils.isBlank(clientName) || StringUtils.isBlank(topicName)) {
-            throw new ServiceException(-1, "client_name or topic_name is blank");
-        }
+    public static void deleteSubscriber(String topicName, String clientName) throws ServiceException {
         subscriberCache.remove(clientName);
         subscriberDao.deleteSubscriber(clientName, topicName);
     }
 
-    public synchronized static void updateConsumeState(Command pullAckCommand) throws ServiceException {
-        Map<String, Object> body = GsonSerializeUtil.fromJson(pullAckCommand.getBody());
-        String topicName = (String) body.get("topic_name");
-        String clientName = (String) body.get("client_name");
-        Double msg_id = (Double) body.get("msg_id");
-        if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || msg_id.intValue() <= 0) {
-            throw new ServiceException(-1, "client_name or topic_name or msg_id is blank");
-        }
-
+    public synchronized static void updateConsumeState(String topicName, String clientName, int msgId) throws ServiceException {
         Subscriber subscriber = getSubscriber(clientName, topicName);
-        if (subscriber.getMinConsumeMsgId() < msg_id.intValue()) {
-            updateSubscriber(clientName, topicName, null, msg_id.intValue());
+        if (subscriber != null && subscriber.getMinConsumeMsgId() < msgId) {
+            updateSubscriber(clientName, topicName, null, msgId);
         }
     }
 }
