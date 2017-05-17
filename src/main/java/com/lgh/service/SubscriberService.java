@@ -12,13 +12,12 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.Date;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * Created by ligh on 2017/4/16.
  */
 public class SubscriberService {
-    public static ConcurrentHashMap<String,ConcurrentLinkedQueue<Subscriber>> topicQueue = new ConcurrentHashMap<String, ConcurrentLinkedQueue<Subscriber>>(100);
+    public static ConcurrentHashMap<String, Subscriber> subscriberCache = new ConcurrentHashMap<String, Subscriber>(100);
     private static TopicDao topicDao = new TopicDao();
     private static SubscriberDao subscriberDao = new SubscriberDao();
 
@@ -44,16 +43,23 @@ public class SubscriberService {
                 subscriber.setCreateTime(new Date());
                 subscriberDao.addSubscriber(subscriber);
             }
+            QueueService.initQueue(subscriber);
         } else {
             throw new ServiceException(-1, "topic is not exist");
         }
     }
 
     public static Subscriber getSubscriber(String clientName, String topicName) throws ServiceException {
-        return subscriberDao.getByClientNameAndTopicName(clientName, topicName);
+        Subscriber subscriber = subscriberCache.get(clientName);
+        if (subscriber == null) {
+            subscriber = subscriberDao.getByClientNameAndTopicName(clientName, topicName);
+            subscriberCache.put(subscriber.getName(), subscriber);
+        }
+        return subscriber;
     }
 
     public static void updateSubscriber(String clientName, String topicName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {
+        subscriberCache.remove(clientName);
         if (maxSendMsgId != null) {
             subscriberDao.updateMaxSendMsgId(clientName, topicName, maxSendMsgId);
         }
@@ -73,6 +79,7 @@ public class SubscriberService {
         if (StringUtils.isBlank(clientName) || StringUtils.isBlank(topicName)) {
             throw new ServiceException(-1, "client_name or topic_name is blank");
         }
+        subscriberCache.remove(clientName);
         subscriberDao.deleteSubscriber(clientName, topicName);
     }
 

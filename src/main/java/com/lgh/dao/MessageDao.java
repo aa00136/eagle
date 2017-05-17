@@ -21,8 +21,8 @@ public class MessageDao extends BaseDao{
         add(sql, content, new Date(), new Date());
     }
 
-    public List<Message> listMessageByMaxMsgId(String topicName, Integer maxMsgId, Integer limit) throws ServiceException {
+    public List<Message> listMessageById(String topicName, Integer id, Integer limit) throws ServiceException {
         String sql = String.format("select * from %s where id > ? limit ?", topicName);
-        return list(sql, Message.class, maxMsgId, limit);
+        return list(sql, Message.class, id, limit);
     }
 }
