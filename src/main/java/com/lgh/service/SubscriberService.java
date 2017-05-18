@@ -35,7 +35,7 @@ public class SubscriberService {
                 subscriber.setCreateTime(new Date());
                 subscriberDao.addSubscriber(subscriber);
             }
-            QueueService.initQueue(subscriber);
+            QueueService.initQueueCache(subscriber.getTopicName(), subscriber.getName(), subscriber.getMinConsumeMsgId());
         } else {
             throw new ServiceException(-1, "topic is not exist");
         }

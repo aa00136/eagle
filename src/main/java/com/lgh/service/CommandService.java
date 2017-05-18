@@ -73,6 +73,7 @@ public class CommandService {
         if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || msgId.intValue() <= 0) {
             throw new ServiceException(-1, "client_name or topic_name or msg_id is blank");
         }
+        QueueService.removeConsumeStateCache(topicName, clientName, msgId.intValue());
         SubscriberService.updateConsumeState(topicName, clientName, msgId.intValue());
     }
 
