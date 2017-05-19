@@ -11,26 +11,26 @@ import java.util.List;
  * Created by ligh on 2017/5/6.
  */
 public class SubscriberDao extends BaseDao {
-    public Subscriber getByClientNameAndTopicName(String clientName, String topicName) throws ServiceException {
-        String sql = "select * from subscriber where name = ? and topic_name = ?";
-        return get(sql, Subscriber.class, clientName, topicName);
+    public Subscriber getByClientNameAndTopicId(String clientName, Integer topicId) throws ServiceException {
+        String sql = "select * from subscriber where name = ? and topic_id = ?";
+        return get(sql, Subscriber.class, clientName, topicId);
     }
 
-    public void updateMaxSendMsgId(String clientName, String topicName, Integer maxSendMsgId) throws ServiceException {
-        String sql = "update subscriber set max_send_msg_id = ? where name = ? and topic_name = ?";
-        update(sql, maxSendMsgId, clientName, topicName);
+    public void updateMaxSendMsgId(String clientName, Integer topicId, Integer maxSendMsgId) throws ServiceException {
+        String sql = "update subscriber set max_send_msg_id = ? where name = ? and topic_id = ?";
+        update(sql, maxSendMsgId, clientName, topicId);
     }
 
-    public void updateMinConsumeMsgId(String clientName, String topicName, Integer minConsumeMsgId) throws ServiceException {
-        String sql = "update subscriber set min_consume_msg_id = ? where name = ? and topic_name = ?";
-        update(sql, minConsumeMsgId, clientName, topicName);
+    public void updateMinConsumeMsgId(String clientName, Integer topicId, Integer minConsumeMsgId) throws ServiceException {
+        String sql = "update subscriber set min_consume_msg_id = ? where name = ? and topic_Id = ?";
+        update(sql, minConsumeMsgId, clientName, topicId);
     }
 
-    public void deleteSubscriber(String clientName, String topicName) throws ServiceException {
-        String sql = "delete from subscriber where name = ? and topic_name = ?";
+    public void deleteSubscriber(String clientName, Integer topicId) throws ServiceException {
+        String sql = "delete from subscriber where name = ? and topic_id = ?";
         List<Object> params = new ArrayList<Object>();
         params.add(clientName);
-        params.add(topicName);
+        params.add(topicId);
         delete(sql, params);
     }
 

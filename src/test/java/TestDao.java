@@ -40,7 +40,7 @@ public class TestDao {
 
     @org.junit.Test
     public void test4() throws ServiceException {
-        List<Message> messageList = messageDao.listMessageByMaxMsgId("test", 0, 3);
+        List<Message> messageList = messageDao.listMessageById("test", 0, 3);
         System.out.println(messageList.size());
     }
 

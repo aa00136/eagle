@@ -1,8 +1,7 @@
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import com.huisa.common.database.BaseDao;
 import com.huisa.common.exception.ServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Test {
 	private static Logger logger = LoggerFactory.getLogger(Test.class);
@@ -12,8 +11,8 @@ public class Test {
 		try {
 			new BaseDao()
 					.generateJavaBean(
-							"subscriber",
-							"E:\\学习资料\\大学\\课程资料\\毕业设计\\eagle\\src\\test\\java",
+							"consume_info",
+							"D:\\git_repository_self\\eagle\\src\\test\\java",
 							"com.lgh");
 		} catch (ServiceException e) {
 		}

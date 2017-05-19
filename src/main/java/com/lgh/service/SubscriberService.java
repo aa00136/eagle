@@ -2,7 +2,6 @@ package com.lgh.service;
 
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.SubscriberDao;
-import com.lgh.dao.TopicDao;
 import com.lgh.model.db.Subscriber;
 import com.lgh.model.db.Topic;
 
@@ -17,25 +16,24 @@ import java.util.concurrent.ConcurrentHashMap;
  **/
 public class SubscriberService {
     public static ConcurrentHashMap<String, Subscriber> subscriberCache = new ConcurrentHashMap<String, Subscriber>(100);
-    private static TopicDao topicDao = new TopicDao();
     private static SubscriberDao subscriberDao = new SubscriberDao();
 
     public static void addSubscriber(String topicName, String clientName) throws ServiceException {
-        Topic topic = topicDao.getTopicByName(topicName);
+        Topic topic = TopicService.getTopicByName(topicName);
         if (topic != null) {
             Subscriber subscriber = getSubscriber(clientName, topicName);
             if (subscriber == null) {
-                Integer maxId = topicDao.getQueueMaxMsgId(topicName);
+                Integer maxId = TopicService.getQueueMaxMsgId(topicName);
                 subscriber = new Subscriber();
                 subscriber.setName(clientName);
-                subscriber.setTopicName(topicName);
+                subscriber.setTopicId(topic.getId());
                 subscriber.setMaxSendMsgId(maxId);
                 subscriber.setMinConsumeMsgId(maxId);
                 subscriber.setStatus(1);
                 subscriber.setCreateTime(new Date());
                 subscriberDao.addSubscriber(subscriber);
             }
-            QueueService.initQueueCache(subscriber.getTopicName(), subscriber.getName(), subscriber.getMinConsumeMsgId());
+            QueueService.initQueueCache(topic.getName(), subscriber.getName(), subscriber.getMinConsumeMsgId());
         } else {
             throw new ServiceException(-1, "topic is not exist");
         }
@@ -44,7 +42,8 @@ public class SubscriberService {
     public static Subscriber getSubscriber(String clientName, String topicName) throws ServiceException {
         Subscriber subscriber = subscriberCache.get(clientName);
         if (subscriber == null) {
-            subscriber = subscriberDao.getByClientNameAndTopicName(clientName, topicName);
+            Topic topic = TopicService.getTopicByName(topicName);
+            subscriber = subscriberDao.getByClientNameAndTopicId(clientName, topic.getId());
             if (subscriber != null) {
                 subscriberCache.put(subscriber.getName(), subscriber);
             }
@@ -54,17 +53,19 @@ public class SubscriberService {
 
     public static void updateSubscriber(String clientName, String topicName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {
         subscriberCache.remove(clientName);
+        Topic topic = TopicService.getTopicByName(topicName);
         if (maxSendMsgId != null) {
-            subscriberDao.updateMaxSendMsgId(clientName, topicName, maxSendMsgId);
+            subscriberDao.updateMaxSendMsgId(clientName, topic.getId(), maxSendMsgId);
         }
         if (minConsumeMsgId != null) {
-            subscriberDao.updateMinConsumeMsgId(clientName, topicName, minConsumeMsgId);
+            subscriberDao.updateMinConsumeMsgId(clientName, topic.getId(), minConsumeMsgId);
         }
     }
 
     public static void deleteSubscriber(String topicName, String clientName) throws ServiceException {
         subscriberCache.remove(clientName);
-        subscriberDao.deleteSubscriber(clientName, topicName);
+        Topic topic = TopicService.getTopicByName(topicName);
+        subscriberDao.deleteSubscriber(clientName, topic.getId());
     }
 
     public synchronized static void updateConsumeState(String topicName, String clientName, int msgId) throws ServiceException {

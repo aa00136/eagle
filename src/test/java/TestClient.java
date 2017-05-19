@@ -7,7 +7,7 @@ import com.lgh.util.ClientHelper;
  * Created by ligh on 2017/5/8.
  */
 public class TestClient {
-    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh4");
+    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh6");
 
     @org.junit.Test
     public void testPullTask() throws InterruptedException {
@@ -17,8 +17,43 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(1000);
         client.subscribe("test", true);
-        ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 10, 1000, 1);
+        ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 10, 100, 1);
+
+        while (true) {
+
+        }
+    }
+
+    @org.junit.Test
+    public void testPullTask2() throws InterruptedException {
+        CommandClient client = new CommandClient(clientConfig);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
+        client.subscribe("test", true);
+        ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 10, 100, 1);
+
+        while (true) {
+
+        }
+    }
+
+    @org.junit.Test
+    public void testPullTask3() throws InterruptedException {
+        CommandClient client = new CommandClient(clientConfig);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        Thread.sleep(1000);
+        client.subscribe("test", true);
+        ClientHelper.startPullTask(client, "test", new MessageHandlerImp(), 10, 100, 1);
 
         while (true) {
 
@@ -34,7 +69,11 @@ public class TestClient {
             e.printStackTrace();
         }
         for (int i = 0; i < 10; i++) {
-            client.pull("tes", 5, true);
+            client.pull("test", 5, true);
+        }
+
+        while (true) {
+
         }
     }
 
@@ -46,9 +85,23 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        //for (int i = 4002; i < 5000; i++) {
-        client.publish("test", "hello lgh 500001", true);
-        //}
+        Thread.sleep(1000);
+        for (int i = 0; i < 5000; i++) {
+            client.publish("test", "hello lgh " + i, true);
+        }
+    }
+
+    @org.junit.Test
+    public void testPublish2() throws InterruptedException {
+        CommandClient client = new CommandClient(clientConfig);
+        try {
+            client.connectToServer();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        for (int i = 10001; i < 13000; i++) {
+            client.publish("test", "hello lgh " + i, true);
+        }
     }
 
     @org.junit.Test
@@ -63,13 +116,14 @@ public class TestClient {
     }
 
     @org.junit.Test
-    public void testSubscribe() {
+    public void testSubscribe() throws InterruptedException {
         CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(5000);
         client.subscribe("test", true);
     }
 

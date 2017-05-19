@@ -22,4 +22,12 @@ public class TopicService {
         topicDao.addTopic(topic);
         topicDao.createQueue(topicName);
     }
+
+    public static Topic getTopicByName(String topicName) throws ServiceException {
+        return topicDao.getTopicByName(topicName);
+    }
+
+    public static Integer getQueueMaxMsgId(String topicName) throws ServiceException {
+        return topicDao.getQueueMaxMsgId(topicName);
+    }
 }
