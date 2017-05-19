@@ -42,8 +42,7 @@ public class SubscriberService {
     public static Subscriber getSubscriber(String clientName, String topicName) throws ServiceException {
         Subscriber subscriber = subscriberCache.get(clientName);
         if (subscriber == null) {
-            Topic topic = TopicService.getTopicByName(topicName);
-            subscriber = subscriberDao.getByClientNameAndTopicId(clientName, topic.getId());
+            subscriber = subscriberDao.getByClientNameAndTopicName(clientName, topicName);
             if (subscriber != null) {
                 subscriberCache.put(subscriber.getName(), subscriber);
             }
@@ -53,12 +52,11 @@ public class SubscriberService {
 
     public static void updateSubscriber(String clientName, String topicName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {
         subscriberCache.remove(clientName);
-        Topic topic = TopicService.getTopicByName(topicName);
         if (maxSendMsgId != null) {
-            subscriberDao.updateMaxSendMsgId(clientName, topic.getId(), maxSendMsgId);
+            subscriberDao.updateMaxSendMsgId(clientName, topicName, maxSendMsgId);
         }
         if (minConsumeMsgId != null) {
-            subscriberDao.updateMinConsumeMsgId(clientName, topic.getId(), minConsumeMsgId);
+            subscriberDao.updateMinConsumeMsgId(clientName, topicName, minConsumeMsgId);
         }
     }
 

@@ -1,6 +1,7 @@
 import com.huisa.common.database.BaseDao;
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.MessageDao;
+import com.lgh.dao.SubscriberDao;
 import com.lgh.dao.TopicDao;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Topic;
@@ -14,6 +15,7 @@ import java.util.List;
 public class TestDao {
     private TopicDao topicDao = new TopicDao();
     private MessageDao messageDao = new MessageDao();
+    private SubscriberDao subscriberDao = new SubscriberDao();
 
     @org.junit.Test
     public void test1() throws ServiceException {
@@ -46,6 +48,16 @@ public class TestDao {
 
     @org.junit.Test
     public void test5() throws ServiceException {
-        System.out.println(topicDao.getQueueMaxMsgId("test"));
+        System.out.println(subscriberDao.getByClientNameAndTopicName("lgh", "test").getId());
+    }
+
+    @org.junit.Test
+    public void test6() throws ServiceException {
+        subscriberDao.updateMaxSendMsgId("lgh", "test", 110);
+    }
+
+    @org.junit.Test
+    public void test7() throws ServiceException {
+        subscriberDao.updateMinConsumeMsgId("lgh", "test", 110);
     }
 }

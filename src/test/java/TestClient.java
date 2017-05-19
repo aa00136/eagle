@@ -7,7 +7,7 @@ import com.lgh.util.ClientHelper;
  * Created by ligh on 2017/5/8.
  */
 public class TestClient {
-    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh6");
+    private static ClientConfig clientConfig = new ClientConfig("localhost", 8000, "lgh");
 
     @org.junit.Test
     public void testPullTask() throws InterruptedException {
@@ -68,6 +68,7 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(1000);
         for (int i = 0; i < 10; i++) {
             client.pull("test", 5, true);
         }
@@ -112,6 +113,7 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(1000);
         client.pullAck("test", 4);
     }
 
@@ -123,29 +125,31 @@ public class TestClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         client.subscribe("test", true);
     }
 
     @org.junit.Test
-    public void testPublishTopic() {
+    public void testPublishTopic() throws InterruptedException {
         CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(1000);
         client.publishTopic("articcle_update", true);
     }
 
     @org.junit.Test
-    public void testUnsubscribe() {
+    public void testUnsubscribe() throws InterruptedException {
         CommandClient client = new CommandClient(clientConfig);
         try {
             client.connectToServer();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        Thread.sleep(1000);
         client.unsubscribe("test", true);
     }
 }
