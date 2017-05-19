@@ -1,8 +1,11 @@
 package com.lgh.service;
 
 import com.huisa.common.exception.ServiceException;
+import com.lgh.excutor.ExcutorFactory;
+import com.lgh.model.ConnectionConsumeState;
 import com.lgh.model.command.*;
 import com.lgh.model.db.Message;
+import com.lgh.task.ConsumeInfoUpdateTask;
 import com.lgh.util.GsonSerializeUtil;
 import org.apache.commons.lang3.StringUtils;
 
@@ -73,8 +76,11 @@ public class CommandService {
         if (StringUtils.isBlank(topicName) || StringUtils.isBlank(clientName) || msgId.intValue() <= 0) {
             throw new ServiceException(-1, "client_name or topic_name or msg_id is blank");
         }
-        QueueService.removeConsumeStateCache(topicName, clientName, msgId.intValue());
-        SubscriberService.updateConsumeState(topicName, clientName, msgId.intValue());
+        SubscriberService.updateSubscriberState(topicName, clientName, msgId.intValue());
+        ConnectionConsumeState consumeState = ConsumeInfoService.removeMessageConsumeState(topicName, clientName, msgId.intValue());
+        if (consumeState != null) {
+            ExcutorFactory.CONSUME_STATE.submit(new ConsumeInfoUpdateTask(topicName, clientName, consumeState.getSendMessages()));
+        }
     }
 
     public static UnsubscribeCommandResp excuteUnsubscribeCmd(Command unsubscribeCmd) throws ServiceException {

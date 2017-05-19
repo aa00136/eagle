@@ -6,7 +6,10 @@ import com.lgh.model.ConnectionConsumeState;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
@@ -23,7 +26,6 @@ public class QueueService {
     private static MessageDao messageDao = new MessageDao();
     private static int QUEUE_LENGTH = 1000;
     private static int WATER_MARK = 500;
-    private static int CONSUME_TIME_OUT = 30;
 
     public synchronized static List<Message> readMessage(String topicName, String clientName, int limit) throws ServiceException {
         List<Message> messageList = new ArrayList<Message>();
@@ -31,28 +33,9 @@ public class QueueService {
         if (subscriber == null) {
             throw new ServiceException(-1, "subscribe mapping not found");
         }
-
-        Map<Integer, ConnectionConsumeState> consumeStateMap = consumeStateCache.get(getQueueKey(topicName, clientName));
-        if (consumeStateMap != null) {
-            long minTime = System.currentTimeMillis();
-            ConnectionConsumeState minSendState = null;
-            Set<Map.Entry<Integer, ConnectionConsumeState>> entrySet = consumeStateMap.entrySet();
-            for (Map.Entry<Integer, ConnectionConsumeState> entry : entrySet) {
-                ConnectionConsumeState state = entry.getValue();
-                if (minTime > state.getSendTime()) {//获取未应答连接中最久的消息
-                    minTime = state.getSendTime();
-                    minSendState = state;
-                }
-            }
-            //超时重传
-            long nowTime = System.currentTimeMillis();
-            long period = (nowTime - minTime) / 1000;
-            if (period > CONSUME_TIME_OUT && !minSendState.getSendMessages().isEmpty()) {
-                messageList = minSendState.getSendMessages();
-                minSendState.setSendTime(nowTime);
-
-                return messageList;
-            }
+        messageList = ConsumeInfoService.getTimeOutMessage(topicName, clientName);
+        if (!messageList.isEmpty()) {
+            return messageList;
         }
 
         Map<String, LinkedBlockingQueue<Message>> queueMap = queueCache.get(topicName);
@@ -72,17 +55,7 @@ public class QueueService {
         queueBuffer.drainTo(messageList, limit);
         if (messageList.size() > 0) {
             SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);
-
-            ConnectionConsumeState consumState = new ConnectionConsumeState();
-            consumState.setLastMsgId(messageList.get(messageList.size() - 1).getId());
-            consumState.setSendMessages(messageList);
-            consumState.setSendTime(System.currentTimeMillis());
-            Map<Integer, ConnectionConsumeState> currentStateMap = consumeStateCache.get(getQueueKey(topicName, clientName));
-            if (currentStateMap == null) {
-                currentStateMap = new HashMap<Integer, ConnectionConsumeState>();
-            }
-            currentStateMap.put(consumState.getLastMsgId(), consumState);
-            consumeStateCache.put(getQueueKey(topicName, clientName), currentStateMap);
+            ConsumeInfoService.setMessgeConsumeState(topicName, clientName, messageList);
         }
 
         return messageList;
@@ -92,7 +65,7 @@ public class QueueService {
         messageDao.addMessage(message.getTopicName(), message.getContent());
     }
 
-    public static LinkedBlockingQueue<Message> loadDataFromDB(LinkedBlockingQueue<Message> queueBuffer, String topicName, String clientName, int beginId) throws ServiceException {
+    public synchronized static LinkedBlockingQueue<Message> loadDataFromDB(LinkedBlockingQueue<Message> queueBuffer, String topicName, String clientName, int beginId) throws ServiceException {
         int count = QUEUE_LENGTH - queueBuffer.size();
         List<Message> messageList = messageDao.listMessageById(topicName, beginId, count);
         queueBuffer.addAll(messageList);
@@ -116,13 +89,6 @@ public class QueueService {
             queueBuffer = loadDataFromDB(queueBuffer, topicName, clientName, beginId);
             queueMap.put(clientName, queueBuffer);
             queueCache.put(topicName, queueMap);
-        }
-    }
-
-    public synchronized static void removeConsumeStateCache(String topicName, String clientName, int msgId) {
-        Map<Integer, ConnectionConsumeState> currentStateMap = consumeStateCache.get(getQueueKey(topicName, clientName));
-        if (currentStateMap != null) {
-            currentStateMap.remove(msgId);
         }
     }
 

@@ -89,14 +89,15 @@ public final class ClientHelper {
                 if (messageList == null || messageList.isEmpty()) {
                     break;
                 }
-                boolean consumeResult;
+                //boolean consumeResult;
                 int currentMsgId = 0;
                 for (Message message : messageList) {
                     currentMsgId = message.getId();
-                    consumeResult = handler.handlerMessage(message);
+                    handler.handlerMessage(message);
+                    /*consumeResult = handler.handlerMessage(message);
                     if (!consumeResult) {
                         break;
-                    }
+                    }*/
                 }
 
                 PullContextData pullContextData = new PullContextData(client, topicName, currentMsgId);

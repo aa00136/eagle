@@ -66,7 +66,7 @@ public class SubscriberService {
         subscriberDao.deleteSubscriber(clientName, topic.getId());
     }
 
-    public synchronized static void updateConsumeState(String topicName, String clientName, int msgId) throws ServiceException {
+    public synchronized static void updateSubscriberState(String topicName, String clientName, int msgId) throws ServiceException {
         Subscriber subscriber = getSubscriber(clientName, topicName);
         if (subscriber != null && subscriber.getMinConsumeMsgId() < msgId) {
             updateSubscriber(clientName, topicName, null, msgId);
