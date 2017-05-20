@@ -2,6 +2,7 @@ package com.lgh.model;
 
 import com.lgh.model.db.Message;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ConnectionConsumeState {
@@ -31,5 +32,13 @@ public class ConnectionConsumeState {
 
     public void setSendMessages(List<Message> sendMessages) {
         this.sendMessages = sendMessages;
+    }
+
+    public List<Integer> getSendMsgIds() {
+        List<Integer> msgIds = new ArrayList<Integer>();
+        for (Message message : sendMessages) {
+            msgIds.add(message.getId());
+        }
+        return msgIds;
     }
 }

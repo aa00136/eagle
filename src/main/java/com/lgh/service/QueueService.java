@@ -5,6 +5,7 @@ import com.lgh.dao.MessageDao;
 import com.lgh.model.ConnectionConsumeState;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
+import com.lgh.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,7 +56,7 @@ public class QueueService {
         queueBuffer.drainTo(messageList, limit);
         if (messageList.size() > 0) {
             SubscriberService.updateSubscriber(clientName, topicName, messageList.get(messageList.size() - 1).getId(), null);
-            ConsumeInfoService.setMessgeConsumeState(topicName, clientName, messageList);
+            ConsumeInfoService.setMessageConsumeState(topicName, clientName, messageList);
         }
 
         return messageList;
@@ -71,6 +72,8 @@ public class QueueService {
         queueBuffer.addAll(messageList);
         if (!messageList.isEmpty()) {
             cacheInfo.put(getQueueKey(topicName, clientName), messageList.get(messageList.size() - 1).getId());
+
+            Log.SERVER_QUEUE.info("topic_name=" + topicName + "`subscriber_name=" + clientName + "`load_msg_id=" + beginId);
         }
         return queueBuffer;
     }

@@ -7,6 +7,8 @@ import com.lgh.model.db.ConsumeInfo;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
 import com.lgh.model.db.Topic;
+import com.lgh.util.GsonSerializeUtil;
+import com.lgh.util.Log;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,13 +44,15 @@ public class ConsumeInfoService {
             if (period > CONSUME_TIME_OUT && !minSendState.getSendMessages().isEmpty()) {
                 messageList = minSendState.getSendMessages();
                 minSendState.setSendTime(nowTime);
+
+                Log.SERVER_MESSAGE.info("topic_name=" + topicName + "`subscriber_name=" + clientName + "`resend_msg_ids=" + GsonSerializeUtil.toJson(minSendState.getSendMsgIds()));
             }
         }
 
         return messageList;
     }
 
-    public static void setMessgeConsumeState(String topicName, String clientName, List<Message> messageList) throws ServiceException {
+    public static void setMessageConsumeState(String topicName, String clientName, List<Message> messageList) throws ServiceException {
         ConnectionConsumeState consumState = new ConnectionConsumeState();
         consumState.setLastMsgId(messageList.get(messageList.size() - 1).getId());
         consumState.setSendMessages(messageList);
@@ -59,12 +63,16 @@ public class ConsumeInfoService {
         }
         currentStateMap.put(consumState.getLastMsgId(), consumState);
         consumeStateCache.put(getCacheKey(topicName, clientName), currentStateMap);
+
+        Log.SERVER_MESSAGE.info("topic_name=" + topicName + "`subscriber_name=" + clientName + "`send_msg_ids=" + GsonSerializeUtil.toJson(consumState.getSendMsgIds()));
     }
 
     public static ConnectionConsumeState removeMessageConsumeState(String topicName, String clientName, int msgId) {
         Map<Integer, ConnectionConsumeState> currentStateMap = consumeStateCache.get(getCacheKey(topicName, clientName));
         if (currentStateMap != null) {
             ConnectionConsumeState consumeState = currentStateMap.remove(msgId);
+
+            Log.SERVER_MESSAGE.info("topic_name=" + topicName + "`subscriber_name=" + clientName + "`ack_msg_ids=" + GsonSerializeUtil.toJson(consumeState.getSendMsgIds()));
             return consumeState;
         }
         return null;
