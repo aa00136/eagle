@@ -28,6 +28,7 @@ public class TopicService {
     }
 
     public static Integer getQueueMaxMsgId(String topicName) throws ServiceException {
-        return topicDao.getQueueMaxMsgId(topicName);
+        Integer maxId = topicDao.getQueueMaxMsgId(topicName);
+        return maxId == null ? 0 : maxId;
     }
 }
