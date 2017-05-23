@@ -91,6 +91,8 @@ public class CommandService {
             throw new ServiceException(-1, "client_name or topic_name is blank");
         }
         SubscriberService.deleteSubscriber(topicName, clientName);
+        QueueService.removeQueueCache(topicName, clientName);
+        ConsumeInfoService.removeConsumeStateCache(topicName, clientName);
 
         return new UnsubscribeCommandResp(unsubscribeCmd.getRequestId(), (byte) 1, "unsubscribe success");
     }

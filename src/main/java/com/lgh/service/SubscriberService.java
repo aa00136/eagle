@@ -64,8 +64,6 @@ public class SubscriberService {
         Topic topic = TopicService.getTopicByName(topicName);
         subscriberDao.deleteSubscriber(clientName, topic.getId());
         subscriberCache.remove(clientName);
-        QueueService.removeQueueCache(topicName, clientName);
-        ConsumeInfoService.removeConsumeStateCache(topicName, clientName);
     }
 
     public synchronized static void updateSubscriberState(String topicName, String clientName, int msgId) throws ServiceException {
