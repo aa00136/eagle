@@ -2,7 +2,6 @@ package com.lgh.service;
 
 import com.huisa.common.exception.ServiceException;
 import com.lgh.dao.MessageDao;
-import com.lgh.model.ConnectionConsumeState;
 import com.lgh.model.db.Message;
 import com.lgh.model.db.Subscriber;
 import com.lgh.util.Log;
@@ -22,7 +21,6 @@ import java.util.concurrent.LinkedBlockingQueue;
  **/
 public class QueueService {
     private static ConcurrentHashMap<String, Map<String, LinkedBlockingQueue<Message>>> queueCache = new ConcurrentHashMap<String, Map<String, LinkedBlockingQueue<Message>>>(100);
-    private static ConcurrentHashMap<String, Map<Integer, ConnectionConsumeState>> consumeStateCache = new ConcurrentHashMap<String, Map<Integer, ConnectionConsumeState>>(100);
     private static ConcurrentHashMap<String, Integer> cacheInfo = new ConcurrentHashMap<String, Integer>(100);
     private static MessageDao messageDao = new MessageDao();
     private static int QUEUE_LENGTH = 1000;
@@ -97,5 +95,12 @@ public class QueueService {
 
     private static String getQueueKey(String topicName, String clientName) {
         return topicName + "_" + clientName;
+    }
+
+    public static void removeQueueCache(String topicName, String clientName) {
+        Map<String, LinkedBlockingQueue<Message>> queueMap = queueCache.get(topicName);
+        if (queueMap != null) {
+            queueMap.remove(clientName);
+        }
     }
 }

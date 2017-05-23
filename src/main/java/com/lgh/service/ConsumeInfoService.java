@@ -101,4 +101,8 @@ public class ConsumeInfoService {
     private static String getCacheKey(String topicName, String clientName) {
         return topicName + "_" + clientName;
     }
+
+    public static void removeConsumeStateCache(String topicName, String clientName) {
+        consumeStateCache.remove(getCacheKey(topicName, clientName));
+    }
 }

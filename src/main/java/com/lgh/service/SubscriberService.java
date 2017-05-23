@@ -51,19 +51,21 @@ public class SubscriberService {
     }
 
     public static void updateSubscriber(String clientName, String topicName, Integer maxSendMsgId, Integer minConsumeMsgId) throws ServiceException {
-        subscriberCache.remove(clientName);
         if (maxSendMsgId != null) {
             subscriberDao.updateMaxSendMsgId(clientName, topicName, maxSendMsgId);
         }
         if (minConsumeMsgId != null) {
             subscriberDao.updateMinConsumeMsgId(clientName, topicName, minConsumeMsgId);
         }
+        subscriberCache.remove(clientName);
     }
 
     public static void deleteSubscriber(String topicName, String clientName) throws ServiceException {
-        subscriberCache.remove(clientName);
         Topic topic = TopicService.getTopicByName(topicName);
         subscriberDao.deleteSubscriber(clientName, topic.getId());
+        subscriberCache.remove(clientName);
+        QueueService.removeQueueCache(topicName, clientName);
+        ConsumeInfoService.removeConsumeStateCache(topicName, clientName);
     }
 
     public synchronized static void updateSubscriberState(String topicName, String clientName, int msgId) throws ServiceException {
